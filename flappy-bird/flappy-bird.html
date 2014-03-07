@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+	
+</head>
+<body>
+	<div class="wrapper">
+		<canvas id="canvas"></canvas>
+	</div>
+
+	<script>
+		(function () {
+			var imglist = ['bird.png', 'pipe.png'];
+
+			var Bird = function (param) {
+				this.x = param.x || 0;
+				this.y = param.y || 0;
+				this.w = param.w;
+				this.h = param.h;
+				this.yDir = param.yDir || 20
+				this.img = param.img;
+
+				return this;
+			}
+
+			Bird.prototype.draw = function () {
+
+				this.img.onload = function () {
+					ctx.drawImage(this.img, 0, 0, this.img.width, this.img.height, this.x, this.y, this.w, this.h);
+				};
+				return this;
+			};
+
+			Bird.prototype.jump = function () {
+				this.y += yDir;
+				this.drawe();
+
+				return this;
+			}
+
+			var Box = function (x, y) {
+				this.x = x || boxOption.x;
+				this.y = y || boxOption.y;
+				this.w = boxOption.w;
+				this.h = boxOption.h;
+				this.img = boxOption.img;
+				this.visible = true;
+
+				return this;
+			};
+
+			Box.prototype.draw = function () {
+
+				this.img.onload = function () {
+					ctx.drawImage(this.img, 0, 0, this.img.width, this.img.height, this.x, this.y,
+						this.w, this.h);
+				};
+			};
+
+			var canvas = document.getElementById('canvas');
+			var ctx = canvas.getContext('2d'); 
+
+			var pipe = function (posX, xDir, maxNum) {
+				this.x = posX;
+				this.xDir = xDir;
+				var boxList = [];
+				var box = new Box(0, 0);
+				var boxW = box.w,
+					boxH = box.h;
+				var boxTmp;
+				var maxNum = maxNum || Math.ceil(canvas.height / boxW);
+
+				for (var i = 0; i < maxNum; i++) {
+					boxTmp = new Box(posX, i * boxH);
+					boxList.push(boxTmp);
+				}
+
+				this.obj = boxList;
+				this.boxW = boxW;
+				return this;
+			};
+
+			pipe.prototype.draw = function () {
+				var box;
+				for (var i = 0; i < this.obj.length; i++) {
+					box = this.obj[i];
+					if (box.visible) {
+						box.draw();
+					}
+				}
+				return this;
+			};
+
+			// 随机隐藏两个连续的箱子
+			pipe.prototype.rand = function () {
+				var boxList = this.obj;
+				for (var i = 0; i < boxList.length; i++) {
+					boxList[i].visible = true;
+				}
+
+				var rand = Math.random() *  (boxList.length - 1);
+				boxList[rand].visible = boxList[rand + 1].visible = false;
+
+				this.obj = boxList;
+
+				return this;
+			};
+
+			pipe.prototype.move = function () {
+				this.x += this.xDir;
+
+				if (this.x < -this.boxW) {
+					this.x = canvas.width;
+					this.rand();
+				}
+				this.draw();
+				return this;
+			};
+
+			var birdImg = new Image();
+			birdImg.src = imglist[0];
+			
+			var bird, 
+				birdConf = {
+					x : 200,
+					y : 200,
+					width : 50,
+					h : 50,
+					img : birdImg
+				};
+			birdImg.onload = function () {
+				bird = Bird(birdConf);
+			}
+			var boxImg = new Image();
+			boxImg.src = imglist[1];
+
+			var pipe1, pipe2;
+			boxImg.onload = function () {
+				pipe1 = (400, 8, 8);
+			}
+		})();
+	</script>
+</body>
+</html>

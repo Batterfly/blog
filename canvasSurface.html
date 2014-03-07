@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
+	<script src='main.js'></script>
+</head>
+<body>
+	<div class="main">
+		<canvas id="canvas"></canvas>
+	</div>
+	<script>
+		var constants = {
+			canvasWidht : 600,
+			canvasHeight : 600,
+			leftArrow : 37,
+			upArrow : 38,
+			rightArrow : 39,
+			downArrow : 40,
+			xMin : -9,
+			xMax : 9,
+			yMin : -9,
+			yMax : 9,
+			xDelta : 0.2,
+			yDelta : 0.2,
+			colorMap : ['#060', '#090', '#0c0', '#0f0', '#9fo','#9c0', '#990', '#960', '#930', '#900', '#c00'],
+			pointWidth : 2,
+			dTheta : 0.05,
+			surfaceScale : 24
+		};
+
+		Surface.prototype.generate = function () {
+			var i = 0;
+			for (var x = constants.xMin; x <= constants.xMax; x += xDelta) {
+				for (var y = constants.yMin; y <= constants.yMax; y+= yDelta) {
+					this.points[i] = point(x, y, this.equation(x, y));
+					i++;
+				}
+			}
+		};
+		Surface.prototype.color = function () {
+			var z;
+			this.zMin = this.zMax = this.points[0][Z];
+			for (vari = 0; i < this.points.length; i++) {
+				z = this.points[i][Z];
+				if (z < this.zMin) {
+					this.zMin = z;
+				}
+				if (z > this.zMax) {
+					this.zMax = z;
+				}
+			}
+			var zDelta = Math.abs(this.zMax - this.zmin) / constants.colorMap.length;
+
+			for (var i = 0; i < this.points.length; i++) {
+				this.points[i].color = constants.colorMap[Math.floor(this.points[i][Z] - this.zMin) / zDelta];
+			}
+		};
+
+		Surface.prototype.draw = function () {
+			var myCanvas = document.getElementById('myCanvas');
+			var ctx = myCanvas.getContext('2d');
+			this.points = Surface.points.sort(Surface.sortByXZIndex);
+
+			var point;
+			for (var i = 0; i < this.points.length; i++) {
+				point = this.point[i];
+				ctx.fillStyle = point[Z].color;
+				ctx.fillRect(point[X] * constants.surfaceScale, point[Y] * constants.surfaceScale, constants.pointWidth, constants.pointWidth);
+			}
+		};
+
+		Surface.prototype.multi = function (R) {
+			var px = 0, py = 0, pz = 0, sum;
+			var p = this.points;
+
+			for (var v = 0; v < p.length; v++) {
+				px = p[v][X];
+				py = p[v][Y];
+				pz = p[v][Z];
+				for (var row = 0; row < R.length; row++) {
+					sum = R[row][0] * px + R[row][1] * pz + R[row][2] * pz
+					p[v][row] = sum;
+				}
+			}
+		};
+
+		Surface.prototype.yRotate = function (sign) {
+			var R = [
+					[0, 0, 0],
+					[0, 0, 0],
+					[0, 0, 0]
+					];
+			var sign = sign*constants.dTheta;
+			R[0][0] = Math.cos( sign );
+			R[0][1] = 0;
+			R[0][2] = Math.sin( sign );
+			R[1][0] = 0;
+			R[1][1] = 1;
+			R[1][2] = 0;
+			R[0][0] = -Math.sin( sign );
+			R[0][1] = 0;
+			R[0][2] = Math.cos( sign );
+
+			this.multi(R);
+			this.erase();
+			this.draw();
+		};
+
+		Surface.prototype.zRotate = function (sign) {
+			var R = [
+					[0, 0, 0],
+					[0, 0, 0],
+					[0, 0, 0]
+					];
+			var sign = sign*constants.dTheta;
+			R[0][0] = Math.cos( sign );
+			R[0][1] = -Math.sin( sign );
+			R[0][2] = 0;
+			R[1][0] = Math.sin( sign );
+			R[1][1] = Math.cos( sign );
+			R[1][2] = 0;
+			R[0][0] = 0
+			R[0][1] = 0;
+			R[0][2] = 1;
+
+			this.multi(R);
+			this.erase();
+			this.draw();
+		};
+
+		Surface.prototype.xRotate = function (sign) {
+			var R = [
+					[0, 0, 0],
+					[0, 0, 0],
+					[0, 0, 0]
+					];
+			var sign = sign*constants.dTheta;
+			R[0][0] = 1;
+			R[0][1] = 0;
+			R[0][2] = 0;
+			R[1][0] = 0;
+			R[1][1] = Math.cos( sign );
+			R[1][2] = -Math.sin( sign );
+			R[0][0] = 0;
+			R[0][1] = Math.sin( sign );
+			R[0][2] = Math.cos( sign );
+			
+			this.multi(R);
+			this.erase();
+			this.draw();
+		};
+
+		function appendCanvasElement () {
+			var canvasElement = document.createElement('canvas');
+			canvasElement.width = constants.canvasWidht;
+			canvasElement.height = constants.canvasHeight;
+			canvasElement.id = 'myCanvas';
+			canvasElement.getContext('2d').translate(constants.canvasWidht / 2, constants.canvasHeight / 2);
+			document.body.appendChild(canvasElement);
+		}
+	</script>
+</body>
+</html>

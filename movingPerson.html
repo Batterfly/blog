@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"> -->
+    <style>
+		
+    </style>
+</head>
+<body>
+	<h1>开f12，点击鼠标人往上跳，额具体设置参数有点不着边</h1>
+	<canvas id="canvas" width="600" height="400">
+		
+	</canvas>
+	
+<script>
+	(function () {
+		var canvas = document.getElementById('canvas');
+		var ctx = canvas.getContext('2d');
+
+		/*var Game = function () {
+			this.canvas = canvas;
+			this.ctx = ctx;
+			return this;
+		};
+
+		Game.prototype.init = function () {
+
+		}
+*/
+		var Object = function (x, y, w, h, img){
+			this.x = x;
+			this.y = y;
+			this.width = w;
+			this.height = h;
+			this.image = img;
+			this.xDir = 15;
+			this.yDir = 5;
+			this.color = '#f00';
+			return this;
+		};
+
+		Object.prototype.draw = function () {
+			if (this.image) {
+				ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+			} else {
+				ctx.save();
+				ctx.fillStyle = this.color;
+				ctx.fillRect(this.x, this.y, this.width, this.height);
+				ctx.restore();
+			}
+		};
+
+		Object.prototype.move = function () {
+			this.x = this.x + this.xDir;
+			this.y = this.y + this.yDir;
+
+			// loop
+			this.x = this.x <= 0 ? canvas.width :　(this.x > canvas.width ? 0 : this.x);
+			this.y = this.y <= 0 ? 0 : (this.y > canvas.height ? 0 : this.y);
+
+			this.draw();
+		};
+
+		var Person = function (x, y, image, size, imageWidth) {
+			this.x = x;
+			this.y = y;
+			this.image = image;
+			this.size = size;
+			this.offsetX = 0;
+			this.offsetY = 0;
+			this.imageWidth = imageWidth;
+
+			// 跳跃原点
+			this.originY = y;
+			this.originX = x;
+
+			this.index = 0;
+		};
+
+		Person.prototype.changeItem = function () {
+			this.offsetX = (this.index * this.size) % this.imageWidth;
+			this.offsetY = Math.floor((this.index * this.size) / this.imageWidth);
+			this.index += 1;
+			if (this.index * this.size >= this.imageWidth) {
+				this.index = 0;
+			}
+			// this.draw();
+			return this;
+		};
+
+		Person.prototype.draw = function () {
+			ctx.drawImage(this.image, this.offsetX, this.offsetY, this.size, this.size, this.x, this.y, this.size, this.size);
+			return this;
+		};
+
+		Person.prototype.jump = function () {
+
+			// var offsetY = calculate(this.originX, Jump.vx, Jump.vy, Jump.g);
+			var offsetY = calculate().y;
+			var offsetX = calculate().x;
+			this.y = this.originY - offsetY;
+			this.x = this.originX + offsetX;
+			// this.originX += 2;
+
+			Jump.t += Jump.delta;
+			if (offsetY < 0) {
+				this.y = this.originY;
+				this.x = this.originX;
+				Jump.t = 0;
+				Jump.delta = 0;
+			}
+			console.log(offsetY, this.y, offsetX, this.x);
+
+			this.changeItem();
+			this.draw();
+			return this;
+		};
+
+		// 跳跃参数
+		var Jump = {
+			vx : 8,
+			vy : 25,
+			g : 3,
+			t : 0,
+			delta : 1
+		};
+
+ 
+		 // 抛物线公式
+
+
+
+    		function calculate () {
+			// return ((vy * vy) / g) - (g * x * x) / (2 * vx *vx);
+			return {
+				x : Jump.vx * Jump.t,
+				y : Jump.vy * Jump.t - Jump.g * Jump.t * Jump.t / 2
+			};
+		}
+
+		// 初始化
+		function init () {
+			var obj1 = new Object(500, 50, 30, 10);
+			var obj2 = new Object(100, 300, 40, 10);
+			var obj3 = new Object(350, 250, 50, 10);
+
+			var objectList = [];
+			objectList.push(obj1);
+			objectList.push(obj2);
+			objectList.push(obj3);
+
+			var image = new Image();
+			image.src = '0.png';
+
+			var person1, timeInter, personList = [];
+			image.onload = function () {
+				person1 = new Person(150, 284, image, 80, image.width);
+				person2 = new Person(250, 84, image, 80, image.width);
+				person3 = new Person(350, 44, image, 80, image.width);
+
+				personList.push(person1);
+				personList.push(person2);
+				personList.push(person3);
+
+				function loop() {
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					ctx.fillStyle = '#ccc';
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+					for (var i = 0; i < objectList.length; i++) {
+						objectList[i].move();
+					}
+
+					for (var j = 0; j < personList.length; j++) {
+						personList[j].jump();
+					}
+					collision();
+				}
+
+				// window.requestAnimationFrame(loop);  
+				setInterval(loop, 60); 
+
+			}
+
+			// 碰撞检测
+			function collision () {
+
+				var collisionX = false, collisionY = false, result = false;
+				for (var i = 0; i < objectList.length; i++) {
+					var obj = objectList[i];
+					for (var j = 0; j < personList.length; j++) {
+						var per = personList[i];
+
+						var objX = obj.x + obj.width / 2,		// obj中心点
+							objY = obj.y + obj.height / 2,	
+							perX = per.x + per.size / 2,	// person的中心点
+							perY = per.y + per.size / 2,
+
+							objW = obj.width,
+							objH = obj.height,
+							perW = per.size,
+							perH = per.size;
+
+						var collisionX = false, collisionY = false, result = false;
+						// x轴是否相交
+						if (Math.abs(objX - perX) < (objW + perW) / 2) {
+							 collisionX = true;
+						}
+						// y轴是否相交
+						if (Math.abs(objY - perY) < (objH + perH) / 2) {
+							 collisionY = true;
+						}
+
+						result = collisionX && collisionY;
+
+					}
+				}
+
+				if (result) {
+					// alert('发生碰撞，game over');
+					console.log('发生碰撞');
+					Jump.t = 0;
+					obj.xDir = 0;
+					// clearInterval(timeInter);
+				}
+
+			};
+
+
+			document.onclick = function () {
+				Jump.delta = 1;
+			}
+
+		}
+		init();
+	})();
+</script>
+</body>
+</html>
