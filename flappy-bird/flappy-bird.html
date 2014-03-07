@@ -5,7 +5,7 @@
 </head>
 <body>
 	<div class="wrapper">
-		<canvas id="canvas"></canvas>
+		<canvas id="canvas" width='400' height='600'></canvas>
 	</div>
 
 	<script>
@@ -25,9 +25,8 @@
 
 			Bird.prototype.draw = function () {
 
-				this.img.onload = function () {
-					ctx.drawImage(this.img, 0, 0, this.img.width, this.img.height, this.x, this.y, this.w, this.h);
-				};
+				ctx.drawImage(this.img, 0, 0, this.img.width, this.img.height, this.x, this.y, this.w, this.h);
+
 				return this;
 			};
 
@@ -51,10 +50,9 @@
 
 			Box.prototype.draw = function () {
 
-				this.img.onload = function () {
-					ctx.drawImage(this.img, 0, 0, this.img.width, this.img.height, this.x, this.y,
-						this.w, this.h);
-				};
+				ctx.drawImage(this.img, 0, 0, this.img.width, this.img.height, this.x, this.y,
+					this.w, this.h);
+
 			};
 
 			var canvas = document.getElementById('canvas');
@@ -82,6 +80,7 @@
 
 			pipe.prototype.draw = function () {
 				var box;
+				console.table(this.obj);
 				for (var i = 0; i < this.obj.length; i++) {
 					box = this.obj[i];
 					if (box.visible) {
@@ -124,20 +123,44 @@
 				birdConf = {
 					x : 200,
 					y : 200,
-					width : 50,
+					w : 50,
 					h : 50,
 					img : birdImg
 				};
-			birdImg.onload = function () {
-				bird = Bird(birdConf);
-			}
+
 			var boxImg = new Image();
 			boxImg.src = imglist[1];
 
-			var pipe1, pipe2;
-			boxImg.onload = function () {
-				pipe1 = (400, 8, 8);
+			var boxOption = {
+				xDir : 10,
+				x : 300,
+				y : 0,
+				w : 80,
+				h : 80,
+				img : boxImg
+
 			}
+			birdImg.onload = function () {
+				boxImg.onload = function () {
+					bird = new Bird(birdConf);
+					pipe1 = new pipe(400, 8, 8);
+					init();
+				};
+				
+			}
+			
+			var pipe1, pipe2;
+			
+
+			function init () {
+				ctx.fillStyle = '#ccc';
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				console.dir(bird);
+				// console.dir(pipe1);
+				bird.draw();
+				pipe1.draw();
+			}
+			
 		})();
 	</script>
 </body>
