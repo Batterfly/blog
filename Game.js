@@ -9,7 +9,7 @@
 			var parent = win;
 			for (var i = 0, len = nsArr.length; i < len;i++){
 				(typeof parent[nsArr[i]] == 'undefined') && (parent[nsArr[i]] = {});
-				parent= parent[nsArr[i]];
+				parent = parent[nsArr[i]];
 			}
 
 			if (func) {
@@ -528,7 +528,7 @@
 		}
 	});
 
-	var preLoad = function(imglist, callback) {
+	/*var preLoad = function(imglist, callback) {
 		if (isArray(imglist)) {
 			var imgLen = imglist.length;
 			var loadedImg = 1;
@@ -568,5 +568,66 @@
 			}
 			return;
 		}
-	};
+	};*/
+
+	Game.register('Game.sprite', function (game) {
+		var defaultOptions = {
+			x : 0,
+			y : 0,
+			width : 20, 
+			height : 20,
+			img : new Image(), 
+			posY : 0,
+			fps : 60,
+			imageWidth : 0,
+			curIndex : 0, 
+			stop : false,
+			startXIndex : 0,
+			endXIndex : 0
+		};
+		var sprite = function (param) {
+			var options = Game.util.extend(defaultOptions, param, true);
+			this.x = options.x;
+			this.y = options.y;
+			this.width = options.width;
+			this.height = options.height;
+			this.img = options.img;
+			this.posY = options.posY;
+			this.fps = options.fps;
+			this.imageWidth = options.imageWidth;
+			this.stop = options.stop;
+			this.startXIndex = options.startXIndex;
+			this.endXIndex = options.endXIndex || Math.floor(options.imageWidth / options.width);
+		};
+		sprite.prototype = {
+			changeIndex : function () {
+				var startX = this.startXIndex,
+					endX = this.endXIndex;
+				this.curIndex += 1;
+				this.curIndex > endX ? startX : this.curIndex;
+				this.draw();
+			},
+
+			draw : function () {
+				var ctx = Game.canvas.ctx;
+				if (this.stop) {
+					return;
+				}
+				else {
+					ctx.save();
+					ctx.drawImage(this.img, this.width * this.curIndex, this.posY, this.width, this.height, this.x, this.y, this.width, this.height);
+					ctx.restore();
+				}				
+			},
+
+			stop : function () {
+				this.stop = true;
+			},
+
+			start : function () {
+				this.stop = false;
+				this.draw();
+			}
+		};
+	})
 })
