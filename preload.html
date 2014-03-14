@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+    <title>智能粒子</title>
+    <meta charset='utf-8' />
+    <style type="text/css">
+        body{background-color:black;}
+        #Canvas{margin:50px auto;display:block;border:1px red solid;}
+    </style>
+</head>
+ 
+<body>
+    
+</body>
+<script type="text/javascript">
+    var preLoad = function(imglist, callback) {
+        if (1) {
+            var imgLen = imglist.length;
+            var loadedImg = 1;
+            for (var i = 0; i < imgLen; i++) {
+                var img = new Image();
+                img.src = imglist[i];
+
+                // 判断释放在缓存中
+                if (img.complete || img.width) {
+
+                    loadedImg += 1;
+                    if(loadedImg == imgLen) {
+                        console.log('finish');
+                        callback(imglist);
+                        return;
+                    }
+                    continue;
+
+                } else {
+                    img.onload = function () {
+
+                        img.onload = null;  // 释放内存
+                        loadedImg += 1;
+                        if(loadedImg == imgLen) {
+                            console.log('finish');
+                            callback(imglist);
+                            return;
+                        }
+                    }
+                }
+                
+                
+            }
+        }
+    };
+
+    var appendImg = function(imglist) {
+        var fragment = document.createDocumentFragment();
+        for (var i = 0, len = imglist.length; i < len; i++){
+            var img = new Image();
+            img.src = imglist[i];
+            fragment.appendChild(img);
+        }
+        document.body.appendChild(fragment);
+        console.dir(fragment);
+    }
+    var imglist = [
+        'http://f.hiphotos.baidu.com/image/w%3D2048/sign=cd61dabd67380cd7e61ea5ed957cac34/a6efce1b9d16fdfad24ee3e3b68f8c5494ee7b98.jpg',
+        'http://h.hiphotos.baidu.com/image/w%3D2048/sign=d0c9a512271f95caa6f595b6fd2f7e3e/b7fd5266d0160924ecdb0277d60735fae7cd34db.jpg',
+        'http://f.hiphotos.baidu.com/image/w%3D2048/sign=cc08e3933bdbb6fd255be2263d1caa18/42a98226cffc1e171750db594890f603728de9ef.jpg',
+        'http://c.hiphotos.baidu.com/image/h%3D900%3Bcrop%3D0%2C0%2C1440%2C900/sign=63f1dca9b4fd5266b82b30149b23f459/738b4710b912c8fc21f4268ffe039245d6882169.jpg',
+        'http://a.hiphotos.baidu.com/image/h%3D900%3Bcrop%3D0%2C0%2C1440%2C900/sign=997ae0f734d3d539de3d03c30abc8a22/f31fbe096b63f6243bf0f90a8544ebf81a4ca30e.jpg'
+    ];
+    preLoad(imglist, appendImg);
+</script>
+</html>

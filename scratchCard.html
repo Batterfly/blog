@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+		html, body {
+			margin: 0;
+			padding: 0;
+			background: #000;
+		}
+		.wrapper {
+			position: relative;
+			width: 1024px;
+			margin: auto;
+		}
+		.blowImg {
+			width: 600px;
+			height: 400px;
+		}
+		img {
+			width: 600px;
+			height: 400px;
+		}
+		.blowImg, #myCanvas {
+			position: absolute;
+			border: 0px solid #000;
+		}
+    </style>
+</head>
+<body>
+	<div class="wrapper">
+		<div class="blowImg">
+			<img src="http://b.hiphotos.baidu.com/image/h%3D768%3Bcrop%3D0%2C0%2C1024%2C768/sign=f8101107b33533faeab6912890e89e6d/cf1b9d16fdfaaf51121619b68e5494eef11f7ac6.jpg" alt=""恭喜中奖！>
+		</div>
+	    <canvas id="myCanvas" width='1024' height='768' style="border:0px solid red;">your browser donot support the canvas</canvas>
+	</div>
+	
+<script>
+	var init = function () {
+		var canvas = document.getElementById('myCanvas');
+		var ctx = canvas.getContext('2d');
+
+		// 遮盖要显示的图层
+		ctx.globalCompositeOperation = 'source-over';
+		ctx.fillStyle = '#aaa';
+		ctx.beginPath();
+		ctx.rect(0, 0, canvas.width, canvas.height);
+		ctx.fill();
+		ctx.closePath();
+
+		ctx.stokeStyle = 'rgba(0, 0, 0, 255)';
+		ctx.lineWidth = 10;
+		ctx.lineCap = 'round';
+		ctx.lineJoin = 'round';
+		ctx.globalCompositeOperation = 'destination-out';
+
+		var firstClick = false;
+		canvasOffsetLeft = getElementPosition(canvas).x;
+		canvasOffsetTop = getElementPosition(canvas).y;
+
+		
+		// 触摸事件
+		var touchStart = function (e) {
+			e.preventDefault();
+			var touch = e.touches[0];
+			var startX = touch.pageX - canvasOffsetLeft; 
+			var startY = touch.pageY - canvasOffsetTop;
+			console.log(touch.pageX, touch.pageY);
+			ctx.beginPath();
+			ctx.moveTo(startX, startY);
+		};
+
+		// 计算touchmove的触发事件
+		var count = 0;
+		var touchMove = function (e) {
+			e.preventDefault();
+			var touch;
+			// ctx.moveTo(e.touches[0].pageX - canvasOffsetLeft, e.touches[0].pageY.canvasOffsetTop);
+			// for (var i = 0; i < e.touches.length; i++) {
+				touch = e.touches[0];
+				count++;
+				console.log(touch.pageX, touch.pageY, count, e.touches.length);
+				posX = touch.pageX - canvasOffsetLeft; 
+				posY = touch.pageY - canvasOffsetTop;
+				ctx.lineTo(posX, posY);
+			// }
+			ctx.stroke();
+			
+			/*if (!canvas.style.opacity) {
+				canvas.style.opacity = 0.09;
+			}else {
+				canvas.style.opacity = '';
+			}*/
+			// 计算刮开面积
+			// var percentage = areaOK();
+			// console.log(percentage);
+			
+		};
+		var touchEnd = function (e) {
+			e.preventDefault();
+			ctx.closePath();
+			return false;
+		};
+
+		// 绑定事件
+		document.addEventListener('touchstart', touchStart, false);
+		document.addEventListener('touchmove', touchMove, false);
+		document.addEventListener('touchend', touchEnd, false);
+
+		// 判断刮开区域达到一定的程度
+		function areaOK () {
+			var data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+			var pixels = canvas.width * canvas.height, clearPixels = 0;
+			for (var i = 0; i < data.length; i += 4) {
+				if (data[i+3] == 0) {
+					clearPixels++;
+				}
+			}
+			return clearPixels / pixels;
+		}
+		areaOK();
+};
+	// 获取当前元素在页面上的偏移位置
+	function getElementPosition (e) {
+		var x = 0, y = 0;
+		while (e != null) {
+			x += e.offsetLeft;
+			y += e.offsetTop;
+			e = e.offsetParent;
+		}
+		// console.log(x, y);
+		return {
+			x : x, 
+			y : y
+		};
+	}
+
+	
+	
+	init();
+</script>
+</body>
+</html>

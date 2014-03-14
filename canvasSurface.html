@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
-	<script src='main.js'></script>
+	<style>
+		body {
+			text-align: center;
+		}
+	</style>
 </head>
 <body>
-	<div class="main">
+	<!-- <div class="main">
 		<canvas id="canvas"></canvas>
-	</div>
+	</div> -->
 	<script>
 		var constants = {
-			canvasWidht : 600,
+			canvasWidth : 600,
 			canvasHeight : 600,
 			leftArrow : 37,
 			upArrow : 38,
@@ -27,20 +30,46 @@
 			dTheta : 0.05,
 			surfaceScale : 24
 		};
+		var X = 0;
+		var Y = 1;
+		var Z = 2;
+
+		var controlKeyPressed = false;		// Shared between processKeyDown();
+		var surface = new Surface();		// A set of points
+
+		function point (x, y, z) {
+			return [x, y, z];
+		}
+
+		function Surface () {
+			this.points = [];
+			return this;
+		}
+
+		Surface.prototype.equation = function (x, y) {
+			var d = Math.sqrt(x * x + y * y);
+			return 4 * (Math.sin(d) / d);
+		}
+
+		Surface.prototype.sortByXZIndex = function (a, b) {
+			return a[Z] - b[Z];
+		}
 
 		Surface.prototype.generate = function () {
 			var i = 0;
-			for (var x = constants.xMin; x <= constants.xMax; x += xDelta) {
-				for (var y = constants.yMin; y <= constants.yMax; y+= yDelta) {
+			for (var x = constants.xMin; x <= constants.xMax; x += constants.xDelta) {
+				for (var y = constants.yMin; y <= constants.yMax; y+= constants.yDelta) {
 					this.points[i] = point(x, y, this.equation(x, y));
 					i++;
 				}
 			}
+			// console.log(this.points.length);
 		};
+
 		Surface.prototype.color = function () {
 			var z;
 			this.zMin = this.zMax = this.points[0][Z];
-			for (vari = 0; i < this.points.length; i++) {
+			for (var i = 0; i < this.points.length; i++) {
 				z = this.points[i][Z];
 				if (z < this.zMin) {
 					this.zMin = z;
@@ -49,40 +78,62 @@
 					this.zMax = z;
 				}
 			}
-			var zDelta = Math.abs(this.zMax - this.zmin) / constants.colorMap.length;
-
+			var zDelta = Math.abs(this.zMax - this.zMin) / constants.colorMap.length;
+			// console.log(zDelta);
 			for (var i = 0; i < this.points.length; i++) {
-				this.points[i].color = constants.colorMap[Math.floor(this.points[i][Z] - this.zMin) / zDelta];
+				this.points[i].color = constants.colorMap[Math.floor((this.points[i][Z] - this.zMin) / zDelta)];
+				// console.log(Math.floor((this.points[i][Z] - this.zMin) - zDelta));
 			}
+			
 		};
 
 		Surface.prototype.draw = function () {
 			var myCanvas = document.getElementById('myCanvas');
 			var ctx = myCanvas.getContext('2d');
-			this.points = Surface.points.sort(Surface.sortByXZIndex);
+			this.points = this.points.sort(Surface.sortByXZIndex);
 
 			var point;
 			for (var i = 0; i < this.points.length; i++) {
-				point = this.point[i];
-				ctx.fillStyle = point[Z].color;
+				point = this.points[i];
+				ctx.fillStyle = point.color;
+				// console.log(point.color)
 				ctx.fillRect(point[X] * constants.surfaceScale, point[Y] * constants.surfaceScale, constants.pointWidth, constants.pointWidth);
 			}
 		};
 
-		Surface.prototype.multi = function (R) {
-			var px = 0, py = 0, pz = 0, sum;
-			var p = this.points;
+		// Surface.prototype.multi = function (R) {
+		// 	var px = 0, py = 0, pz = 0, sum;
+		// 	var p = this.points;
 
-			for (var v = 0; v < p.length; v++) {
-				px = p[v][X];
-				py = p[v][Y];
-				pz = p[v][Z];
-				for (var row = 0; row < R.length; row++) {
-					sum = R[row][0] * px + R[row][1] * pz + R[row][2] * pz
-					p[v][row] = sum;
-				}
-			}
-		};
+		// 	for (var v = 0; v < p.length; v++) {
+		// 		px = p[v][X];
+		// 		py = p[v][Y];
+		// 		pz = p[v][Z];
+		// 		for (var row = 0; row < 3; row++) {
+		// 			sum = (R[row][X] * px) + (R[row][Y] * pz) + (R[row][Z] * pz);
+		// 			p[v][row] = sum;
+		// 		}
+		// 	}
+		// }
+		Surface.prototype.multi = function(R)
+	      /*
+	        Assumes that R is a 3 x 3 matrix and that this.points (i.e., P) is a 3 x n matrix. This method performs P = R * P.
+	      */
+	      {
+	        var Px = 0, Py = 0, Pz = 0; // Variables to hold temporary results.
+	        var P = this.points; // P is a pointer to the set of surface points (i.e., the set of 3 x 1 vectors).
+	        var sum; // The sum for each row/column matrix product.
+	  
+	        for (var V = 0; V < P.length; V++) // For all 3 x 1 vectors in the point list.
+	        {
+	          Px = P[V][X], Py = P[V][Y], Pz = P[V][Z];
+	          for (var Rrow = 0; Rrow < 3; Rrow++) // For each row in the R matrix.
+	          {
+	            sum = (R[Rrow][X] * Px) + (R[Rrow][Y] * Py) + (R[Rrow][Z] * Pz);
+	            P[V][Rrow] = sum;
+	          }
+	        }     
+	      }
 
 		Surface.prototype.yRotate = function (sign) {
 			var R = [
@@ -128,13 +179,13 @@
 			this.draw();
 		};
 
-		Surface.prototype.xRotate = function (sign) {
+		/*Surface.prototype.xRotate = function (sign) {
 			var R = [
 					[0, 0, 0],
 					[0, 0, 0],
 					[0, 0, 0]
 					];
-			var sign = sign*constants.dTheta;
+			var sign = sign * constants.dTheta;
 			R[0][0] = 1;
 			R[0][1] = 0;
 			R[0][2] = 0;
@@ -148,16 +199,98 @@
 			this.multi(R);
 			this.erase();
 			this.draw();
-		};
+		};*/
+		 Surface.prototype.xRotate = function(sign)
+	      /*
+	        Assumes "sign" is either 1 or -1, which is used to rotate the surface "clockwise" or "counterclockwise".
+	      */
+	      {
+	        var Rx = [ [0, 0, 0],
+	                   [0, 0, 0],
+	                   [0, 0, 0] ]; // Create an initialized 3 x 3 rotation matrix.
+	                           
+	        Rx[0][0] = 1;
+	        Rx[0][1] = 0; // Redundant but helps with clarity.
+	        Rx[0][2] = 0; 
+	        Rx[1][0] = 0; 
+	        Rx[1][1] = Math.cos( sign*constants.dTheta );
+	        Rx[1][2] = -Math.sin( sign*constants.dTheta );
+	        Rx[2][0] = 0; 
+	        Rx[2][1] = Math.sin( sign*constants.dTheta );
+	        Rx[2][2] = Math.cos( sign*constants.dTheta );
+	        
+	        this.multi(Rx); // If P is the set of surface points, then this method performs the matrix multiplcation: Rx * P
+	        this.erase(); // Note that one could use two canvases to speed things up, which also eliminates the need to erase.
+	        this.draw();
+	      }
+
+		Surface.prototype.erase = function () {
+			var myCanvas = document.getElementById('myCanvas');
+			var ctx = myCanvas.getContext('2d');
+			ctx.clearRect(-constants.canvasWidth / 2, -constants.canvasHeight / 2, myCanvas.width, myCanvas.height);
+		}
 
 		function appendCanvasElement () {
 			var canvasElement = document.createElement('canvas');
-			canvasElement.width = constants.canvasWidht;
+			canvasElement.width = constants.canvasWidth;
 			canvasElement.height = constants.canvasHeight;
 			canvasElement.id = 'myCanvas';
-			canvasElement.getContext('2d').translate(constants.canvasWidht / 2, constants.canvasHeight / 2);
+			// canvasElement.getContext('2d').translate(constants.canvasWidht / 2, constants.canvasHeight / 2);
+			canvasElement.getContext('2d').translate(constants.canvasWidth / 2, constants.canvasHeight / 2);
 			document.body.appendChild(canvasElement);
 		}
+
+		function processKeyDown (evt) {
+			if (evt.ctrlKey) {
+				switch (evt.keyCode) {
+					case constants.upArrow : 
+						evt.preventDefault();
+						break;
+					case constants.downArrow : 
+						evt.preventDefault();
+						break;
+					case constants.rightArrow : 
+						evt.preventDefault();
+						surface.zRotate(-1);
+						break;
+					case constants.leftArrow : 
+						evt.preventDefault();
+						surface.zRotate(1);
+						break;
+				}
+				return;
+			}
+			 
+			switch (evt.keyCode) {
+				case constants.upArrow : 
+					surface.xRotate(1);
+					evt.preventDefault();
+					break;
+				case constants.downArrow : 
+					evt.preventDefault();
+					surface.xRotate(-1);
+					break;
+				case constants.rightArrow : 
+					evt.preventDefault();
+					surface.yRotate(-1);
+					break;
+				case constants.leftArrow : 
+					evt.preventDefault();
+					surface.yRotate(1);
+					break;
+			}
+			
+		}
+
+		function onloadInit () {
+			appendCanvasElement();
+			surface.draw();
+			document.addEventListener('keydown', processKeyDown, false);
+		}
+
+		surface.generate();
+		surface.color();
+		window.addEventListener('load', onloadInit, false);
 	</script>
 </body>
 </html>
