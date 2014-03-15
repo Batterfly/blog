@@ -570,8 +570,78 @@
 		}
 	};*/
 
+	var gameObj = function (x, y, w, h) {
+		this.x = x || 0;
+		this.y = y || 0;
+		this.width = w || 50;
+		this.height = h || 50;
+		this.type = 'obj';
+	};
+
+	gameObj.prototype.moveTo = function (x, y) {
+		x = x || this.x;
+		y = y || this.y;
+		this.x = x;
+		this.y = y;
+
+		return this;
+	};
+
+	gameObj.prototype.moveBy = function (dx, dy) {
+		dx = dx || 0;
+		dy = dy || 0;
+
+		this.x += dx;
+		this.y += dy;
+
+		return this;
+	};
+
+	gameObj.prototype.resize = function (w, h) {
+		w = w || this.w;
+		h = h || this.h;
+	};
+
+	gameObj.prototype.get = function (attr) {
+		return this[attr];
+	}
+
+	gameObj.prototype.set = function (key, val) {
+		if(this[key]){
+			this[key] = val;
+			return this;
+		}
+		else {
+			return;
+		}
+	}
+
+	/*碰撞检测*/
+	gameObj.prototype.collide = function (obj, callback) {
+
+	}
+
+	/*util工具模块*/
+	var Util = function () {
+		var self = {};
+
+		/*矩形碰撞检测*/
+		self.RectAndRect = function (obj1, obj2, callback) {
+			var cx1 =
+		}
+
+		/*判断两条线段是否相交*/
+		self.LineAndLine = function (point1, point2, point3, point4) {
+			var k = (point2.y - point1.y) / (point2.x - point1.x);
+
+			return ! ( ( (k * (point3.x - point1.x) + point1.y) - point3.y) && ( (k * (point4.x - point1.x) + point1.y) - point4.y) );
+
+			// 另一种方案
+			
+		}
+	}
 	Game.register('Game.sprite', function (game) {
-		var defaultOptions = {
+		var spriteDefaultOptions = {
 			x : 0,
 			y : 0,
 			width : 20, 
@@ -585,12 +655,16 @@
 			startXIndex : 0,
 			endXIndex : 0
 		};
-		var sprite = function (param) {
-			var options = Game.util.extend(defaultOptions, param, true);
-			this.x = options.x;
-			this.y = options.y;
-			this.width = options.width;
-			this.height = options.height;
+		var Sprite = function (param) {
+
+			// 重置相关参数
+			var options = Game.util.extend(spriteDefaultOptions, param, true);
+
+			// 继承自gameObj的相关属性
+			gameObj.call(this, options.x, options.y, options.width, options.height);
+			
+			// 扩展sprite相关属性
+			this.type = 'sprite';
 			this.img = options.img;
 			this.posY = options.posY;
 			this.fps = options.fps;
@@ -599,6 +673,9 @@
 			this.startXIndex = options.startXIndex;
 			this.endXIndex = options.endXIndex || Math.floor(options.imageWidth / options.width);
 		};
+
+		// 设置继承链，表明gameObj为sprite的父元素
+		sprite.prototype = new gameObj();
 		sprite.prototype = {
 			changeIndex : function () {
 				var startX = this.startXIndex,
@@ -629,5 +706,111 @@
 				this.draw();
 			}
 		};
-	})
-})
+	});
+	
+	var ShapeDefaultOption = {
+		x : 0,
+		y : 0,
+		width : 100,
+		height : 100,
+		rad : 100,
+		lineWidth : 5,
+		style : '#000',
+		isFill : true,
+		isStoke : false
+	};
+
+	// 矩形
+	var Rect = function (param) {
+
+		// 重置相关参数
+		var options = util.extend(ShapeDefaultOption, param, true);
+		gameObj.call(this, options.x, options.y, options.width, options.height);
+		this.type = 'rect';
+	};
+
+	Rect.prototype = new Object();
+
+	Rect.prototype.draw = function () {
+		var ctx = Canvas.ctx;
+		ctx.save();
+		/*if (this.isFill) {
+			ctx.fillStyle = this.style;
+			ctx.fillRect(this.x, this.y, this.width, this.height);
+
+		}
+		else {
+			ctx.stokenStyle = this.style;
+			ctx.lineWidth = this.lineWidth;
+			ctx.rect(this.x, this.y, this.width, this.height);
+		}*/
+		this.fillStyle = this.stokeStyle = this.style;
+		ctx.beginPath();
+		ctx.rect(this.x, this.y, this.width, this.height);
+		ctx.closePath();
+		this.isFill && ctx.fill();
+		this.isStoke && ctx.stoke();
+
+		ctx.restore();
+		return this;
+	};
+
+	var rectimgObj = function (param) {
+		var options = util.extend(ShapeDefaultOption, param, true);
+		this.img = param.img || new Image();
+		this.offsetX = param.offsetX || 0;
+		this.offsetY = param.offsetY || 0;
+	};
+	rectimgObj.prototype = new Rect();
+
+	rectimgObj.prototype.draw = function () {
+		var ctx = Canvas.ctx;
+		ctx.save();
+		ctx.beginPath();
+		ctx.drawImage(this.img, this.offsetX, this.offsetY, this.width, this.height, this.x, this.y, this.width, this.height);
+	};
+
+	var Circle = function (param) {
+		var options = util.extend(ShapeDefaultOption, param, true);
+		gameObj.call(this, options.x, options.y, options.width, options.height);
+
+		this.startAngle = param.startAngle || 0;
+		this.endAngle = param.endAngle || Math.PI * 2;
+		this.type = 'circle';
+	};
+
+	Circle.prototype = new gameObj();
+	Circle.prototype.draw = function () {
+		var ctx = Canvas.ctx;
+		ctx.save();
+		ctx.beginPath();
+		this.fillStyle = this.stokenStyle = this.style;
+		ctx.arc(this.x, this.y, this.rad, this.startAngle, this.endAngle, false);
+		ctx.closePath();
+
+		this.isFill && ctx.fill();
+		this.isStroke && ctx.stroke();
+
+		ctx.restore();
+		return this;
+	};
+	
+	var cirimgObj = function (param) {
+		var options = util.extend(ShapeDefaultOption, param, true);
+		this.img = param.img || new Image();
+		this.offsetX = param.offsetX || 0;
+		this.offsetY = param.offsetY || 0;
+	};
+	cirimgObj.prototype = new Circle();
+	cirimgObj.prototype.draw = function () {
+		var ctx = Canvas.ctx;
+		ctx.save();
+		ctx.beginPath();
+		ctx.arc(this.x, this.y, this.rad, this.startAngle, this.endAngle, false);
+		ctx.closePath();
+		ctx.drawImage(this.img, this.offsetX, this.offsetY, this.width, this.height, this.x, this.y, this.width, this.height);
+	};
+    
+
+
+});
