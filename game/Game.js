@@ -60,8 +60,196 @@
 
 	
 
+	Game.register('Game.core', function(param) {
+		/**
+		 * 通过id获取元素
+		**/
+		this.$ = function (id) {
+			return document.getElementById(id);
+		};
 
-	/*var gameObj = (function () {
+		/**
+		 * 通过类名获取元素
+		**/
+		this.$$ = function (classname) {
+			return document.querySelector('.'+ classname);
+		};
+
+		/**
+		 *通过标签名获取元素
+		**/
+		this.$$$ = function (tagName, parent) {
+			var parent = parent || document;
+			return parent.getElmentByTagName(tagName);
+		};
+
+		/**
+		 * 事件绑定
+		**/
+		this.bindHandler = (function () {
+			if (window.addEventListener) {
+				return function(elem, type, handler) {
+					elem.addEventListener(type, handler, false);
+				}
+			}
+			else if (window.attachEvent) {
+				return function (elem, type, handler) {
+					elem.attachEvent("on" + type, handler);
+				}
+			}
+		})();
+
+		/**
+		 * 事件解除绑定
+		**/
+		this.unbindHandler = (function () {
+			if (window.removeEventListener) {
+				return function(elem, type, handler) {
+					elem.removeEventListener(type, handler, false);
+				}
+			}
+			else if (window.detachEvent) {
+				return function (elem, type, handler) {
+					elem.detachEvent("on" + type, null);
+				}
+			}
+		})();
+
+		/**
+		 * 获取事件对象
+		**/
+		this.getEventObj = function (evt) {
+			return evt || win.event;
+		};
+
+		/**
+		 * 获取事件目标对象
+		**/
+		this.getEventTarget = function (evt) {
+			var e = this.getEventObj(evt);
+			return e.target || e.srcElement;
+		};
+
+		/**
+		 * 获取元素在页面上的位置
+		**/
+		this.getPos = function (elem) {
+			var left = 0, top = 0;
+			while (elem.offsetParent) {
+				left += elem.offsetLeft;
+				top += elem.offsetTop;
+				elem = elem.offsetParent;
+			}
+			return {
+				left : left, 
+				top : top
+			};
+		};
+
+		/**
+		 * 阻止默认事件
+		**/
+		this.preventDefault = function (evt) {
+			if (evt.preventDefault) {
+				evt.preventDefault();
+			}else {
+				evt.returnValue = false;
+			}
+		};
+
+		/**
+		 * 获取对象计算的样式
+		**/
+		this.getComputedStyle = (function () {
+			var body = document.body;
+			if(body.currentStyle) {
+				return function (elem) {
+					return elem.currentStyle;
+				}
+			}
+			else if (document.defaultView.getComputedStyle) {
+				return function (elem) {
+					return document.defaultView.getComputedStyle(elem, null);
+				}
+			}
+		})();
+
+		/**
+		 * 是否为undefined
+		**/
+		this.isUndefined = function (elem) {
+			return typeof elem === 'undefined';
+		};
+
+		/**
+		 * 是否为数组
+		**/
+		this.isArray = function (elem) {
+			return Object.prototype.toString.call(elem) === "[object, Array]";
+		};
+
+		/**
+		 * 是否为对象
+		**/
+		this.isObject = function (elem) {
+			return elem === Object(elem);
+		};
+
+		/**
+		 * 是否数字
+		**/
+		this.isNumber = function (elem) {
+			return Object.prototype.toString.call(elem) === "[object, Number]";
+		};
+		/**
+		 * 是否为字符串
+		**/
+		this.isString = function (elem) {
+			return Object.prototype.toString.call(elem) === "[object, String]";
+		};
+
+		/**
+		 * 复制对象属性
+		**/
+		this.extend = function (des, sour, isCover) {
+			for (var key in sour) {
+				if (des[key]) {
+					/*if (isCover) {
+						des[key] = sour[key];
+					}
+					else {
+						continue;
+					}*/
+					isCover && (des[key] = sour[key]);
+				}
+				else {
+					des[key] = sour[key];
+				}
+
+				// 另一种方案
+				/*var isUndefined = this.isUndefined;
+				(isUndefined(isCover)) && (isCover = true);
+				for (var name in sour) {
+					if (isCover || isUndefined(des[name])) {
+						des[name] = sour[name];
+					}
+				}*/
+			}
+		};
+
+		/**
+		 * 原型继承对象
+		**/
+		this.inherit = function (child, parent) {
+			var func = function () {};
+			func.prototype = parent.prototype;
+			child.prototype = new func();
+			child.prototype.constructor = child;
+			child.prototype.parent = parent;
+		};
+	});
+
+	var gameObj = (function () {
 		/* 玩家对象 */
 		var player = function (options) {
 			this.init(options);
@@ -130,7 +318,7 @@
 				});
 			}
 		}
-	});*/
+	});
 	/*canvas基本形状对象*/
 	Game.register('Game.shape', function (game) {
 		// 矩形对象
@@ -398,7 +586,7 @@
 		/*矩形碰撞检测*/
 		self.RectAndRect = function (obj1, obj2, callback) {
 			var cx1 =
-		}
+		};
 
 		/*判断两条线段是否相交*/
 		self.LineAndLine = function (point1, point2, point3, point4) {
@@ -408,9 +596,56 @@
 
 			// 另一种方案
 			
+		};
+
+		/*判断两个没有旋转的矩形是否相交*/
+		self.rectCollide = function(obj1, obj2) {
+			var cx1 = obj1.x + obj1.width / 2,
+				cy1 = obj1.y + obj1.height / 2,
+				cx2 = obj2.x + obj1.width / 2,
+				cy2 = obj2.y + obj2.height / 2; 
+			var collX = false, collY = false;
+			(Math.abs(cx2 - cx1) < (obj1.width + obj2.width) / 2) && collX = true;
+			(Math.abs(cy2 - cy1) < (obj1.height + obj2.height) / 2) && collY = true;
+
+			return collX && collY;
+		};
+
+		/*判断两个原型之间的碰撞*/
+		self.circleRectCollide = function (obj1, obj2) {
+			var rect, cir;
+			if (obj1.type == 'circle')  {
+				cir = obj1;
+				rect = obj2;
+			}
+			else {
+				cir = obj2;
+				rect = obj1;
+			}
+
+			var distance = Math.sqrt((cir.x - rect.x) * (cir.x * rect.x) + (cir.y - rect.y) * (cir.y - rect.y));
+
+		};
+		/*判断两个原型是否相交*/
+		self.circleCollide = function (obj1, obj2) {
+			var distance = (obj1.x - obj2.x) * (obj1.x - ob2.x) + (obj1.y - ob2.y) * (obj1.y -  obj2.y);
+			return (obj1.rad + obj2.rad) * (obj1.rad + ob2.rad) > (obj1.x - obj2.x) * (obj1.x - ob2.x) + (obj1.y - ob2.y) * (obj1.y -  obj2.y);
+		}
+		// 计算碰撞函数，默认矩形碰撞
+		function calculate (x1, y1, w1, h1, x2, y2, w2, h2) {
+			var ax = x1 + w1 / 2,
+				ay = y1 + h1 / 2,
+				bx = x2 + w2 / 2,
+				by = y2 + h2 / 2;
+			var collX = false, collY = false;
+
+			(Math.abs(bx - ax) < (w1 + w2) / 2) && (collX = true);
+			(Math.abs(by - ay) < (h1 + h2) / 2) && (collY = true);
+
+			return collX && collY;
 		}
 	}
-	/*Game.register('Game.sprite', function (game) {
+	Game.register('Game.sprite', function (game) {
 		var spriteDefaultOptions = {
 			x : 0,
 			y : 0,
@@ -476,7 +711,7 @@
 				this.draw();
 			}
 		};
-	});*/
+	});
 	
 	var ShapeDefaultOption = {
 		x : 0,
@@ -525,6 +760,20 @@
 		return this;
 	};
 
+	var rectimgObj = function (param) {
+		var options = util.extend(ShapeDefaultOption, param, true);
+		this.img = param.img || new Image();
+		this.offsetX = param.offsetX || 0;
+		this.offsetY = param.offsetY || 0;
+	};
+	rectimgObj.prototype = new Rect();
+
+	rectimgObj.prototype.draw = function () {
+		var ctx = Canvas.ctx;
+		ctx.save();
+		ctx.beginPath();
+		ctx.drawImage(this.img, this.offsetX, this.offsetY, this.width, this.height, this.x, this.y, this.width, this.height);
+	};
 
 	var Circle = function (param) {
 		var options = util.extend(ShapeDefaultOption, param, true);
@@ -570,3 +819,51 @@
 
 
 });
+
+var Game = function (width, height) {
+	var util = require('./util');
+	var preload = require('./preload');
+	var shape = require('./shape');
+	var gameObj = require('./gameObj');
+	var sprite = require('./sprite');
+	var canvas = require('./canvas');
+
+	this.canvas = canvas;
+	this.canvas.width = width;
+	this.canvas.height = height;
+	this.objList = [];
+	this.preload = preload;
+	this.util = util;
+	this.shape = shape;
+	this.sprite = sprite;
+	this.gameObj = gameObj;
+
+	util.bindHandler.call(this.canvas, event) {
+		for (var i = this.objList.length -1; i > -1; i--) {
+			var obj = this.objList[i];
+			if (Math.abs(obj.x - event.pageX) < obj.width / 2 && Math.abs(obj.y - event.pageY) < obj.height / 2) {
+				for (var j = 0, len = obj.eventlist.length; j++) {
+					if (obj.eventList[j].eventType = event.Type) {
+						obj.eventList[j].callback(obj);
+					}
+				}
+			}
+		}
+	};
+
+	return this;
+};
+
+Game.prototype.createObj = function (param) {
+	var obj = this.gameObj(param);
+	this.objList.push(obj);
+	return obj;
+};
+Game.prototype.removeObj = function (obj) {
+	/*if (this.objList.indexOf(obj) !== -1) {
+		this.objList.splice(this.objList.indexOf(obj), 1);
+	}*/
+	this.objList.indexOf(obj) && this.objList.splice(this.objList.indexOf(obj), 1);
+	return this;
+};
+

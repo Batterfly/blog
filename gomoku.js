@@ -176,7 +176,8 @@ $(function) {
 			else if (direction == 'oblique'){
 				for (var i = 0; i < n - 1 ; i++) {
 					// 该位置是否存在棋子,并且该长度是否超出了棋盘的范围
-					if (obj[index + i * this.width] && obj[index + i * this.width] == obj[index + (i + 1) * this.width] && ){
+					if (obj[index + i * this.width] && obj[index + i * this.width] == obj[index + (i + 1) * this.width - 1] 
+						&& (turnPos(i).x - n >= 0) && (turnPos(i).x + n < this.width) && (turnPos(i).y - n > 0) && (turnPos(i).y + n < this.height) ){
 						return true;
 					}
 					else {

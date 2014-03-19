@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <canvas id="canvas"></canvas>
+	<script src='sea.js' data-main="./lib"></script>
+</head>
+<body>
+    <script>
+        
+        /*seajs.use('./lib/shape', function (shape) {
+            var options = {
+                x : 500,
+                y : 100,
+                width : 200,
+                height : 50,
+                style : '#ff0'
+            };
+            var rect = shape.rect;
+            var r = new rect(options);
+            r.draw();
+        })*/
+        seajs.use('./lib/shape', function (shape) {
+            var options = {
+                x : 500,
+                y : 100,
+                width : 200,
+                height : 50,
+                style : '#ff0'
+            };
+            var rect = shape.rect;
+            var r = new rect(options);
+            r.draw();
+        })
+    </script>
+</body>
+</html>

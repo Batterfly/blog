@@ -23,7 +23,7 @@ $(function () {
 		this.posY = 0;
 		this.canMove = true;		// 方块是否可以移动
 		this.grids = shapes[type];		// 为shapes数组
-		this.grids = this.grids[0];		// 为shapes数组中的子数组的第一个数组
+		this.grid = this.grids[0];		// 为shapes数组中的子数组的第一个数组
 		return this;
 	};
 
@@ -101,19 +101,42 @@ $(function () {
 			return result;
 		},
 
-		// 开始渲染
-		render : function () {
-			var grid = this.grid;
-			// 在对应的坐标上，将对应位置的方块进行标记
-			gameObj[(this.posY + grid[1]) * game.width + (this.posX + grid[0])] = 1;
-			gameObj[(this.posY + grid[3]) * game.width + (this.posX + grid[2])] = 1;
-			gameObj[(this.posY + grid[5]) * game.width + (this.posX + grid[4])] = 1;
-			gameObj[(this.posY + grid[7]) * game.width + (this.posX + grid[6])] = 1;
+		// 将元素添加到已完成的列表中
+		addToGameObj : function () {
+			if (!canMove) {
+				var grid = this.grid;
+				// 在对应的坐标上，将对应位置的方块进行标记
+				gameObj[(this.posY + grid[1]) * game.width + (this.posX + grid[0])] = 1;
+				gameObj[(this.posY + grid[3]) * game.width + (this.posX + grid[2])] = 1;
+				gameObj[(this.posY + grid[5]) * game.width + (this.posX + grid[4])] = 1;
+				gameObj[(this.posY + grid[7]) * game.width + (this.posX + grid[6])] = 1;
+			}
 			return this;
+		},
+		updatePos : function () {
+			this.tmpSharpe = [];
+			var tmpArr = [];
+			for (var i = 0; i < this.grid.length / 2; i++) {
+				tmpArr = [this.posX + this.grid[i * 2], this.posY + this.grid[i * 2 + 1]];
+				this.tmpSharpe.push(tmpArr);
+			}
+		}
+
+		// 判断移动中的方块是否与已存在的方块碰撞
+		collision : function () {
+				var obj, index;
+				for (var j = 0; j < this.grids.length - 2; j += 2) {
+					index = this.grids[i] * this.width + this.grids[i + 1];
+					if (gameObj[index] == 1)
+						return index;
+				}
+				return ;
+			}
 		}
 	};
 	function init() {
 		var i, len = gameObj.length;
+		// 绘制gameObj
 		for (i = 0; i < len; i++) {
 			var obj = gameObj[i];
 			if (obj === 1) {
@@ -121,5 +144,51 @@ $(function () {
 				ctx.fillRect((i % game.width), Math.floor(i / game.width), game.size, game.size);
 			}
 		}
+		// 绘制正在移动的方块
+		for (var j = 0; j < tmpSharpe.length; i++) {
+			ctx.fillRect(tmpSharpe[i][0], tmpSharpe[i][1], game.size, game.size);
+		}
 	}
+
+	// 判断是否得分
+	function getscore() {
+		var n = []，count = 0;
+		// 将每一行都设置为1
+		for (var k = 0; k < game.heigth; k++) {
+			n[k] = 1;
+		}
+		var scores = [0, 10, 20, 50, 80];
+		// 若不满足得分条件则设置为0
+		for(var i = (game.heigth - 1) * game.width; i >= 0; i -= game.width) {
+			for(var j = 0; j < game.width; j++) {
+				if(gameObj[i * game.width + j] !== 1) {
+					n[i] = 0;
+				}
+			}
+		}
+		for (var m = 0; m < game.heigth; m++){
+			if (n[m] == 1) {
+				count += 1；
+			}
+		}
+		return scores[count];
+	}
+
+	// 删除得分行
+	function disapper (arr) {
+		for (var i = 0; i < arr.length; i++) {
+			if (arr[i] == 1) {
+				deleteALine(i);
+			}
+		}
+	}
+
+	// 把一行方块消失掉
+	function deleteALine (n) {
+		//  判断n是否大于0；
+		for (var i = n * game.width; i > game.width; i--){
+			gameObj[i] = gameObj[i - game.width];
+		}
+	}
+
 })
