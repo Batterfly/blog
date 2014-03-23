@@ -28,8 +28,8 @@
     <div id="main">
         <div id="wb_connect_btn" ></div>
 <!--         <wb:share-button appkey="4Svqpz" addition="simple" type="button"></wb:share-button>
- -->        <input type="button" value="按钮">
-        <h1>没错，你没看错，这是我(chenkehxx)搭建的本地服务器，上面的那个按钮没什么用，别点击了，我就是放着无聊的，这只是为了抓数据，这绝对没有任何病毒，木马，欢迎查看源代码！</h1>
+ -->        <input type="button" value="按钮" id='tag'>
+        <h1>请先登录，后点击按钮</h1>
     </div>
 <script>
     WB2.anyWhere(function (W) {
@@ -38,11 +38,11 @@
         type: '3,2',
         callback: {
             login: function (o) { //登录后的回调函数
-                console.dir('登录成功！');
-                var tag = $('#tag');
-                var sinaText = [];
-                var showTag = function (data) {
+                
+                /*$.getJSON('https://api.weibo.com/2/statuses/friends_timeline.json?count=100&access_token=2.00pOmgLCz3CtSDd02115267e06Gdsq&jsonpCallback=?', function (data) {
+                    console.dir(data);
                     var statuses = data.data.statuses;
+                    console.dir(statuses);
                     for (var i = 0, len = statuses.length; i < len; i++){
                         var obj = statuses[i];
                         // console.dir(obj);
@@ -54,24 +54,55 @@
                             text : obj.text,
                             create_at : obj.created_at
                         };
-                        console.dir(res);
                         $.ajax({
                             url : 'store.php',
                             type : 'POST',
                             data : res,
                             success : function (data) {
-                                console.dir(data);
                                 sinaText.push(obj.text);
                             }
                         });
                     }
                     console.dir(sinaText);
-                };
-                
-                var url = "https://api.weibo.com/2/statuses/friends_timeline.json?count=100&access_token=2.00pOmgLCz3CtSDd02115267e06Gdsq&callback=showTag";
-                var script = document.createElement('script');
-                script.setAttribute('src', url);
-                document.getElementsByTagName('head')[0].appendChild(script);
+                });*/
+                console.dir('登录成功！');
+                /*$.ajax({
+                    type : 'GET',
+                    url : 'https://api.weibo.com/2/statuses/friends_timeline.json?count=100&access_token=2.00pOmgLCz3CtSDd02115267e06Gdsq',
+                    dataType : 'jsonp',
+                    jsonpCallback : 'jsonpCallback',
+                    success : function (data) {
+                        // console.dir(data);
+                        var sinaText = [];
+                        var statuses = data.data.statuses;
+                        for (var i = 0, len = statuses.length; i < len; i++){
+                            var obj = statuses[i];
+                            // console.dir(obj);
+                            var res = {
+                                username : obj.user.name,
+                                userid : obj.user.idstr,
+                                tweetid : obj.id,
+                                source : obj.source,
+                                text : obj.text,
+                                create_at : obj.created_at
+                            };
+                            console.dir(res);
+                            $.ajax({
+                                url : 'store.php',
+                                type : 'POST',
+                                data : res,
+                                success : function (data) {
+                                    console.dir(data);
+                                    sinaText.push(obj.text);
+                                }
+                            });
+                        }
+                        // console.dir(sinaText);
+                    },
+                    error : function () {
+                        console.log('error');
+                    }
+                });*/
             },
 
             logout: function () { //退出后的回调函数
@@ -82,8 +113,45 @@
 });
 </script>
 <script>
-    
-   
+    $('#tag').on('click', function () {
+         $.ajax({
+            type : 'GET',
+            url : 'https://api.weibo.com/2/statuses/friends_timeline.json?count=100&access_token=2.00pOmgLCz3CtSDd02115267e06Gdsq',
+            dataType : 'jsonp',
+            jsonpCallback : 'jsonpCallback',
+            success : function (data) {
+                // console.dir(data);
+                var sinaText = [];
+                var statuses = data.data.statuses;
+                for (var i = 0, len = statuses.length; i < len; i++){
+                    var obj = statuses[i];
+                    // console.dir(obj);
+                    var res = {
+                        username : obj.user.name,
+                        userid : obj.user.idstr,
+                        tweetid : obj.id,
+                        source : obj.source,
+                        text : obj.text,
+                        create_at : obj.created_at
+                    };
+                    console.dir(res.text);
+                    $.ajax({
+                        url : 'store.php',
+                        type : 'POST',
+                        data : res,
+                        success : function (data) {
+                            console.dir(data);
+                            sinaText.push(obj.text);
+                        }
+                    });
+                }
+                // console.dir(sinaText);
+            },
+            error : function () {
+                console.log('error');
+            }
+        });
+    });
 </script>
 </body>
 </html>
