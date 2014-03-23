@@ -12,7 +12,8 @@
             userid varchar(20) NOT NULL,
             source varchar(100) NOT NULL,
             tweettext varchar(280) NOT NULL,
-            PRIMARY KEY (tweetid, userid)
+            create_at varchar(80) NOT NULL,
+            PRIMARY KEY (tweetid)
         )";
     mysql_query($sql, $con);
 

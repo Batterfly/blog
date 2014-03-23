@@ -10,7 +10,7 @@
 
    $sql = "insert into tweets (name, tweetid, userid, source, tweettext, create_at) values('$name', '$tweetid', '$userid', '$source', '$text', '$create_at')";
    $res = mysql_query($sql, $con);
-   echo $sql."\n";
+   // echo $sql."\n";
    if ($res) {
         echo 'insert success!'."\n";
    } else {

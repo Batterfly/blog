@@ -52,16 +52,16 @@
         var statuses = data.data.statuses;
         for (var i = 0, len = statuses.length; i < len; i++){
             var obj = statuses[i];
-            console.dir(obj);
+            // console.dir(obj);
             var res = {
                 username : obj.user.name,
                 userid : obj.user.idstr,
-                id : obj.id,
+                tweetid : obj.id,
                 source : obj.source,
                 text : obj.text,
-                create_at : obj.create_at
+                create_at : obj.created_at
             };
-            console.dir(res);
+            // console.dir(res);
             $.ajax({
                 url : 'store.php',
                 type : 'POST',
