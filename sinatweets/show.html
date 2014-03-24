@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>陈科</title>
+    <meta charset='utf-8'>
+    <!-- <meta http-equiv='Content-Type' content="text/html; charset=utf-8">
+    <meta name='viewport' content='width=device-width, init-scale=1.0, minimum-scale=1.0, user-scale=no'> -->
+    <script src='http://libs.baidu.com/jquery/2.0.0/jquery.js'></script>
+    <script src="js/Chart.js"></script>
+    <style>
+        body {
+            background-color: #eeeeee;
+        }
+        #main {
+            /*width: 1024px;*/
+            /*height: 768px;*/
+            margin: auto;
+            margin-top: 20px;
+        }
+        .blur {
+            position: absolute;
+            background-size: 100% 100%;
+        }
+        #main div h4{
+            width: 600px;
+            text-align: center;
+        }
+        #main .chart{
+            float: left;
+        }
+        .clearfix{
+            clear:both;
+            height:0;
+            overflow:hidden;
+        }
+        h2{
+            text-align: center;
+        }
+    </style>
+    
+</head>
+<body>
+    <div id="main">
+        <h2>新浪微博数据统计</h2>
+        <div class="chart-hour chart">
+            <canvas id="Chart_hour" width="600" height="400"></canvas>
+            <h4>最近一个小时热词列表情况</h4>
+        </div>
+        <div class="chart-day chart">
+            <canvas id="Chart_day" width="600" height="400"></canvas>
+            <h4>最近一天热词列表情况</h4>
+        </div>
+        <div class="chart-month chart">
+            <canvas id="Chart_month" width="600" height="400"></canvas>
+            <h4>最近一个月热词列表情况</h4>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+<script>
+   var chartHour = document.getElementById('Chart_hour');
+   var chartDay = document.getElementById('Chart_day');
+   var chartMonth = document.getElementById('Chart_month');
+   var ctxHour = chartHour.getContext('2d');
+   var ctxDay = chartDay.getContext('2d');
+   var ctxMonth = chartMonth.getContext('2d');
+
+   var fillColor1 = "rgba(220,220,220,0.5)";
+   var strokeColor1 = "rgba(220,220,220,1)";
+   var pointColor1 = "rgba(220,220,220,1)";
+   var pointStrokeColor1 = "#fff";
+
+   var fillColor2 = "rgba(151,187,205,0.5)";
+   var strokeColor2 = "rgba(151,187,205,1)";
+   var pointColor2 = "rgba(151,187,205,1)";
+   var pointStrokeColor2 = "#fff";
+
+   var color1 = {
+        fillColor : fillColor1,
+        strokeColor : strokeColor1,
+        pointColor : pointColor1,
+        pointStrokeColor : pointStrokeColor1
+   };
+   var color2 = {
+        fillColor : fillColor2,
+        strokeColor : strokeColor2,
+        pointColor : pointColor2,
+        pointStrokeColor : pointStrokeColor2
+   };
+
+   /*显示最新一小时记录*/
+   var defaultData = {
+        labels : ["January","February","March","April","May","June","July"],
+        datasets : [
+            /*{
+                fillColor : fillColor1,
+                strokeColor : strokeColor1,
+                pointColor : pointColor1,
+                pointStrokeColor : pointStrokeColor1,
+                data : [65,59,90,81,56,55,40]
+            },
+            {
+                fillColor : fillColor2,
+                strokeColor : strokeColor2,
+                pointColor : pointColor2,
+                pointStrokeColor : pointStrokeColor2,
+                data : [28,48,40,19,96,27,100]
+            }*/
+        ]
+   };
+
+   /*object深度复制函数*/
+   var cloneObj = function (obj) {
+        if (!obj || typeof obj != 'object') {
+            return obj;
+        }
+
+        var temp;
+        /*if (obj.constructor == Array) {
+            temp = [];
+            for (var i = 0, len = obj.length; i < len; i++) {
+                temp[i] = cloneObj(obj[i]);
+            }
+        } else if (obj.constructor == Object) {
+            temp = {};
+            for (var k in obj) {
+                temp[k] = cloneObj(obj[k]);
+            }
+        }*/
+        temp = obj.constructor == Array ? [] : {};
+        for (var i in obj){
+            temp[i] = typeof obj[i] == "object" ? cloneObj(obj[i]) : obj[i];
+        }
+        return temp;
+   };
+
+   /* 生成dataset对象*/
+   var dataSet = function (labels, data, color) {
+        var temp = cloneObj(defaultData);
+        temp.labels = labels;
+        for (var i = 0, len = data.length; i < len; i++) {
+            temp.datasets.push(makeData(data[i], color[i]));
+        }
+        return temp;
+   };
+
+   /*生成data*/
+   var makeData = function (data, color) {
+        return {
+            fillColor : color.fillColor,
+            strokeColor : color.strokeColor,
+            pointColor : color.pointColor,
+            pointStrokeColor : color.pointStrokeColor,
+            data : data
+        };
+   };
+   
+   var labels = ["王菲","汪峰","都教授","来自星星的你","两会","城管","华科"];
+   var dataHour = [ [65,59,90,81,56,55,40], [28,48,40,19,96,27,100]];
+
+   var hour = dataSet(labels, dataHour, [color1, color2]);
+   var day = dataSet(labels, dataHour, [color1, color2]);
+   var month = dataSet(labels, dataHour, [color1, color2]);
+
+   var chartH = new Chart(ctxHour).Line(hour);
+   var charD = new Chart(ctxDay).Bar(day);
+   var charM = new Chart(ctxMonth).Radar(month);
+</script>
+
+</body>
+</html>
