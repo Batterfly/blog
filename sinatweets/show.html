@@ -3,8 +3,8 @@
 <head>
     <title>陈科</title>
     <meta charset='utf-8'>
-    <!-- <meta http-equiv='Content-Type' content="text/html; charset=utf-8">
-    <meta name='viewport' content='width=device-width, init-scale=1.0, minimum-scale=1.0, user-scale=no'> -->
+    <meta http-equiv='Content-Type' content="text/html; charset=utf-8">
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=no'>
     <script src='http://libs.baidu.com/jquery/2.0.0/jquery.js'></script>
     <script src="js/Chart.js"></script>
     <style>
@@ -22,7 +22,7 @@
             background-size: 100% 100%;
         }
         #main div h4{
-            width: 600px;
+            /*width: 600px;*/
             text-align: center;
         }
         #main .chart{
@@ -36,21 +36,29 @@
         h2{
             text-align: center;
         }
+        .chart p input {
+            margin-left: 50px;
+        }
+
     </style>
     
 </head>
 <body>
     <div id="main">
         <h2>新浪微博数据统计</h2>
+        <p><input type="button" value="自动刷新/停止" id="update"></p>
         <div class="chart-hour chart">
+            <p><input type="button" value="更新最近一个小时热词" id="hour"></p>
             <canvas id="Chart_hour" width="600" height="400"></canvas>
             <h4>最近一个小时热词列表情况</h4>
         </div>
         <div class="chart-day chart">
+            <p><input type="button" value="更新一天热词" id="day"></p>
             <canvas id="Chart_day" width="600" height="400"></canvas>
             <h4>最近一天热词列表情况</h4>
         </div>
         <div class="chart-month chart">
+            <p><input type="button" value="更新一个月热词" id="month"></p>
             <canvas id="Chart_month" width="600" height="400"></canvas>
             <h4>最近一个月热词列表情况</h4>
         </div>
@@ -63,6 +71,10 @@
    var ctxHour = chartHour.getContext('2d');
    var ctxDay = chartDay.getContext('2d');
    var ctxMonth = chartMonth.getContext('2d');
+
+  /* var hour = document.getElementById('hour');
+   var day = document.getElementById('day');
+   var month = document.getElementById('month');*/
 
    var fillColor1 = "rgba(220,220,220,0.5)";
    var strokeColor1 = "rgba(220,220,220,1)";
@@ -137,9 +149,10 @@
    var dataSet = function (labels, data, color) {
         var temp = cloneObj(defaultData);
         temp.labels = labels;
-        for (var i = 0, len = data.length; i < len; i++) {
+       /* for (var i = 0, len = data.length; i < len; i++) {
             temp.datasets.push(makeData(data[i], color[i]));
-        }
+        }*/
+        temp.datasets.push(makeData(data, color));
         return temp;
    };
 
@@ -155,15 +168,143 @@
    };
    
    var labels = ["王菲","汪峰","都教授","来自星星的你","两会","城管","华科"];
-   var dataHour = [ [65,59,90,81,56,55,40], [28,48,40,19,96,27,100]];
+   var dataHour = [65,59,90,81,56,55,40];
 
-   var hour = dataSet(labels, dataHour, [color1, color2]);
-   var day = dataSet(labels, dataHour, [color1, color2]);
-   var month = dataSet(labels, dataHour, [color1, color2]);
+   var hourD = dataSet(labels, dataHour, color2);
+   var dayD = dataSet(labels, dataHour, color2);
+   var monthD = dataSet(labels, dataHour, color2);
 
-   var chartH = new Chart(ctxHour).Line(hour);
-   var charD = new Chart(ctxDay).Bar(day);
-   var charM = new Chart(ctxMonth).Radar(month);
+   
+
+   var hour = $('#hour');
+   var day = $('#day');
+   var month = $('#month');
+   var updateBtn = $('#update');
+   // 设置是否自动刷新
+   var autoUpdate = true;
+   var autoUpdateId;
+
+   /*出发最新小时按钮*/
+   var updateHour = function () {
+        // 从服务器获取data信息
+        $.ajax({
+            url : 'getdata.php',
+            type : 'POST',
+            success : function (data) {
+                var hourData = data.split(',');
+                var label = [];
+                var dataNum = [];
+
+                /*解析为两组数据 labels 和 data*/
+                for (var i = 0, len = hourData.length; i < len; i += 2) {
+                    label.push(hourData[i]);
+                    dataNum.push(parseInt(hourData[i + 1]));
+                }
+                /*生成数据*/
+                hourD = dataSet(label, dataNum, color2);
+                winSize();
+                var chartH = new Chart(ctxHour).Line(hourD);
+            }
+        });
+   }
+   hour.on('click', updateHour);
+
+   /*触发最新一天按钮*/
+   function updateDay () {
+        // 从服务器获取data信息
+        $.ajax({
+            url : 'getdata.php',
+            type : 'POST',
+            success : function (data) {
+                var hourData = data.split(',');
+                var label = [];
+                var dataNum = [];
+
+                /*解析为两组数据 labels 和 data*/
+                for (var i = 0, len = hourData.length; i < len; i += 2) {
+                    label.push(hourData[i]);
+                    dataNum.push(parseInt(hourData[i + 1]));
+                }
+                /*生成数据*/
+                dayD = dataSet(label, dataNum, color2);
+                var chartH = new Chart(ctxDay).Bar(dayD);
+            }
+        });
+   }
+   day.on('click', updateDay);
+
+   /*出发月按钮*/
+   function updateMonth () {
+        // 从服务器获取data信息
+        $.ajax({
+            url : 'getdata.php',
+            type : 'POST',
+            success : function (data) {
+                var hourData = data.split(',');
+                var label = [];
+                var dataNum = [];
+
+                /*解析为两组数据 labels 和 data*/
+                for (var i = 0, len = hourData.length; i < len; i += 2) {
+                    label.push(hourData[i]);
+                    dataNum.push(parseInt(hourData[i + 1]));
+                }
+                /*生成数据*/
+                monthD = dataSet(label, dataNum, color2);
+                var chartH = new Chart(ctxMonth).Radar(monthD);
+            }
+        });
+   }
+   month.on('click', updateMonth);
+
+   function createRandomData (obj) {
+        var arr = [];
+        var res = cloneObj(obj);
+        for (var i = 0; i < dayD.labels.length; i++) {
+            var rand = Math.floor(Math.random() * 100);
+            arr.push(rand);
+        }
+        res.datasets[0].data = arr;
+        return res;
+   }
+   updateBtn.on('click', function () {
+        if (autoUpdate) {
+            autoUpdateId = setInterval(function () {
+                var tmp = createRandomData(hourD);
+                winSize();
+                var chartH = new Chart(ctxHour).Line(tmp);
+                /*updateHour();
+                updateDay();
+                updateMonth();*/
+            }, 1000);
+        } else {
+            clearInterval(autoUpdateId);
+        }
+        autoUpdate = !autoUpdate;
+   });
+
+   /*自适应手机屏幕*/
+   function winSize () {
+        if (window.innerWidth < 640){
+            console.log('resize');
+            chartHour.width = window.innerWidth - 20;
+            chartHour.height = window.innerWidth * 2 / 3;
+            chartDay.width = window.innerWidth - 20;
+            chartDay.height = window.innerWidth * 2 / 3;
+            chartMonth.width = window.innerWidth - 20;
+            chartMonth.height = window.innerWidth * 2 / 3;
+        }
+        var chartH = new Chart(ctxHour).Line(hourD);
+        var charD = new Chart(ctxDay).Bar(dayD);
+        var charM = new Chart(ctxMonth).Radar(monthD);
+        // console.log(chartHour.width, window.innerWidth);
+   }
+   $(window).resize(function () {
+        winSize();
+   });
+
+   winSize();
+   
 </script>
 
 </body>
