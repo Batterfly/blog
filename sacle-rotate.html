@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
 </head>
 <body>
 	<div class="main">
@@ -42,13 +41,13 @@
 		};
 		sprite.prototype = new object();
 		sprite.prototype.showUrl = function () {
-			console.log(this.imgurl);
+			// console.log(this.imgurl);
 		}
 
 		var sprite1 = new sprite(0, 0, 50, 50);
 		sprite1.move(100, 100);
-		console.log(sprite1.get('imgurl'));
-		console.dir(sprite1);
+		// console.log(sprite1.get('imgurl'));
+		// console.dir(sprite1);
 		sprite1.showUrl();
 	</script>
 	<script>
@@ -58,25 +57,24 @@
 		ctx.fillStyle = ctx.stokeStyle = '#ccc';
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-		function drawRect (x, y, w, h) {
+		/*function drawRect (x, y, w, h) {
 			ctx.save();
 			ctx.beginPath();
 			ctx.fillStyle = '#000';
-			ctx.translate(x, y);
-			ctx.rotate(Math.PI / 3);
+			ctx.translate(x + w / 2, y + h / 2);
+			// ctx.rotate(Math.PI / 3);
 			ctx.rect(-w / 2, -h / 2, w, h);
-			ctx.translate(-x, -y);
+			ctx.translate(-x - w / 2, -y - h / 2);
 			ctx.closePath();
 			ctx.fill();
 			ctx.restore();
-		}
-		ctx.save();
-		// ctx.rotate(Math.PI / 3);
-		drawRect(300, 200, 300, 200);
+		}*/
+		// ctx.save();
+		// drawRect(150, 100, 300, 200);
 
 		/*获取sacle之后的坐标位置*/
 		// 二维变换 xPos, yPos为缩放的中心点
-		function sacleMatrix(point, xSacle, yScale, xPos, yPos) {
+		/*function sacleMatrix(point, xSacle, yScale, xPos, yPos) {
 			var m = [
 						[0, 0, 0],
 						[0, 0, 0],
@@ -88,11 +86,14 @@
 			m[2][1] = -(yScale - 1) * yPos;
 			var result = Matrix(point, m);
 			return result;
-		};
+		};*/
 
 		/*获取旋转之后的坐标位置*/
 		// centerPoin为围绕改点旋转
 		function rotationMatrix(point, centerPoint, angle) {
+			console.log(point[0], point[1]);
+			ctx.fillStyle = '#0f0';
+			ctx.fillRect(point[0], point[0], 3, 3);
 			var m = [
 						[0, 0, 0],
 						[0, 0, 0],
@@ -109,7 +110,6 @@
 
 			var relativePoint = [], result = [];
 			for (var i = 0; i < point.length; i++) {
-				console.log(point[i], centerPoint[i]);
 				relativePoint.push(point[i] - centerPoint[i]);
 			}
 
@@ -117,8 +117,12 @@
 			for (var i = 0; i < point.length; i++) {
 				result.push(tmp[i] + centerPoint[i]);
 			}
+			
 
-			console.dir(result);
+			console.log(result[0], result[0]);
+			ctx.fillStyle = '#f00';
+			ctx.fillRect(result[0], result[0], 3, 3);
+
 			return result;
 		}
 
@@ -136,9 +140,9 @@
 			return result;
 		}
 		var arr = [2, 3, 1];
-		var point = [150, 100, 1];
+		var point = [100, 100, 1];
 		var centerPoint = [300, 200, 1];
-		rotationMatrix(point, centerPoint, 60);
+		rotationMatrix(point, centerPoint, 0);
 	</script>
 </body>
 </html>

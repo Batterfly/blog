@@ -407,8 +407,8 @@
 			return ! ( ( (k * (point3.x - point1.x) + point1.y) - point3.y) && ( (k * (point4.x - point1.x) + point1.y) - point4.y) );
 
 			// 另一种方案
-			
-		}
+
+		};
 	}
 	/*Game.register('Game.sprite', function (game) {
 		var spriteDefaultOptions = {

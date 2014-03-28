@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
+</head>
+<body>
+	<div class="main">
+		<canvas id="canvas" width="600" height="400"></canvas>
+	</div>
+	<script>
+		var canvas = document.getElementById('canvas');
+		var ctx = canvas.getContext('2d');
+		
+		ctx.fillStyle = ctx.stokeStyle = '#ccc';
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+		function drawRect (x, y, w, h) {
+			ctx.save();
+			ctx.beginPath();
+			ctx.fillStyle = '#000';
+			ctx.translate(x, y);
+			ctx.rotate(Math.PI / 3);
+			ctx.rect(-w / 2, -h / 2, w, h);
+			ctx.translate(-x, -y);
+			ctx.closePath();
+			ctx.fill();
+			ctx.restore();
+		}
+		ctx.save();
+		// ctx.rotate(Math.PI / 3);
+		drawRect(300, 200, 300, 200);
+
+		/*获取sacle之后的坐标位置*/
+		// 二维变换 xPos, yPos为缩放的中心点
+		function sacleMatrix(point, xSacle, yScale, xPos, yPos) {
+			var m = [
+						[0, 0, 0],
+						[0, 0, 0],
+						[0, 0, 1]
+					 ];
+			m[0][0] = xSacle;
+			m[1][1] = yScale;
+			m[2][0] = -(xSacle - 1) * xPos;
+			m[2][1] = -(yScale - 1) * yPos;
+			var result = Matrix(point, m);
+			return result;
+		};
+
+		/*获取旋转之后的坐标位置*/
+		// centerPoin为围绕改点旋转
+		function rotationMatrix(point, centerPoint, angle) {
+			var m = [
+						[0, 0, 0],
+						[0, 0, 0],
+						[0, 0, 1]
+					 ];
+			var cos = Math.cos,
+				sin = Math.sin,
+				angle = angle / 180 * Math.PI;
+
+			m[0][0] = cos(angle);
+			m[0][1] = sin(angle);
+			m[1][0] = -sin(angle);
+			m[1][1] = cos(angle);
+
+			var relativePoint = [], result = [];
+			for (var i = 0; i < point.length; i++) {
+				console.log(point[i], centerPoint[i]);
+				relativePoint.push(point[i] - centerPoint[i]);
+			}
+
+			var tmp = Matrix(relativePoint, m);
+			for (var i = 0; i < point.length; i++) {
+				result.push(tmp[i] + centerPoint[i]);
+			}
+
+			console.dir(result);
+			return result;
+		}
+
+
+		function Matrix(arr, matrix) {
+			var result = [];
+			for (var i = 0, len = matrix.length; i < len; i++) {
+				var sum = 0;
+				for (var j = 0; j < matrix[i].length; j++) {
+					sum += arr[j] * matrix[j][i];
+				}
+				result.push(sum);
+			}
+			
+			return result;
+		}
+		var arr = [2, 3, 1];
+		var point = [150, 100, 1];
+		var centerPoint = [300, 200, 1];
+		rotationMatrix(point, centerPoint, 60);
+	</script>
+	<script>
+		function rotateRectCollide (obj1, obj2) {
+			/*分别获取矩形左右两边和上下两边的轴向量*/
+			var objAxis1 = getAxis(obj1),
+				objAxis2 = getAxis(obj2);
+
+			var hLine1 = objAxis1.horizontalAxis,
+				vLine1 = objAxis1.verticalAxis,
+				hLine2 = objAxis2.horizontalAxis,
+				vLine2 = objAxis2.verticalAxis;
+
+			/*获取矩形在两条轴向量上的投影点数组*/
+			var pointArr1 = [] , pointArr2 = [];
+			pointArr1.push(intersection(hLine1, objAxis1.topLeftPoint));
+			pointArr1.push(intersection(hLine1, objAxis1.topRightPoint));
+			pointArr1.push(intersection(hLine1, objAxis1.bottomLeftPoint));
+			pointArr1.push(intersection(hLine1, objAxis1.bottomRightPoint));
+		}
+		/*获取矩形的轴向量*/
+		function getAxis(obj) {
+			/*依次获取四个顶点和中心点*/
+			var topLeftPoint = {
+					x : obj.x,
+					y : obj.y
+				},
+				topRightPoint = {
+					x : obj.x + obj.width,
+					y : obj.y
+				},
+				bottomLeftPoint = {
+					x : obj.x,
+					y : obj.y + obj.height
+				},
+				buttomRightPoint = {
+					x : obj.x + obj.width,
+					y : obj.y + obj.height
+				},
+				centerPoint = {
+					x : obj.x + obj.width >> 1,
+					y : obj.y + obj.height >> 1
+				},
+				angle = obj.angle;
+
+			/*旋转之后的三个顶点*/
+			topLeftPoint = rotationMatrix(topLeftPoint, centerPoint, angle);
+			topRightPoint = rotationMatrix(topRightPoint, centerPoint, angle);
+			bottomLeftPoint = rotationMatrix(bottomLeftPoint, centerPoint, angle);
+
+			/*获取两条轴向量*/
+			var horizontalAxis = Axis(topLeftPoint, topRightPoint);
+			var verticalAxis = Axis(topLeftPoint, bottomLeftPoint);
+
+			return {
+				horizontalAxis : horizontalAxis,
+				verticalAxis : verticalAxis,
+				topLeftPoint : topLeftPoint,
+				topRightPoint : topRightPoint,
+				bottomLeftPoint : bottomLeftPoint,
+				buttomRightPoint : buttomRightPoint
+			};
+		}
+
+		/*获取旋转之后的坐标位置*/
+		// centerPoin为围绕该点进行旋转
+		function rotationMatrix(point, centerPoint, angle) {
+			var m = [
+						[0, 0, 0],
+						[0, 0, 0],
+						[0, 0, 1]
+					 ];
+			var cos = Math.cos,
+				sin = Math.sin,
+				angle = angle / 180 * Math.PI;
+
+			m[0][0] = cos(angle);
+			m[0][1] = sin(angle);
+			m[1][0] = -sin(angle);
+			m[1][1] = cos(angle);
+
+			var relativePoint = [], result = [];
+			for (var i = 0; i < point.length; i++) {
+				console.log(point[i], centerPoint[i]);
+				relativePoint.push(point[i] - centerPoint[i]);
+			}
+
+			var tmp = Matrix(relativePoint, m);
+			for (var i = 0; i < point.length; i++) {
+				result.push(tmp[i] + centerPoint[i]);
+			}
+
+			return result;
+		}
+
+		/*通过两点获取该线段的轴向量和坐标点*/
+		function Axis (point1, point2) {
+			// 线段的中点
+			var pointTmp = {
+				x : (point1.x + point2.x) / 2,
+				y : (point1.y + point2.y) /2
+			};
+
+			// 垂直轴的斜率
+			var slope = -(point1.x - point2.x) / (point1.y - point2.y);
+
+			// 垂直轴的表达式 y = kx + b
+			return {
+				k : slope,
+				b : point1.y - (slope * point1.x)
+			};
+		}
+
+		// 点在垂直轴上的投影点
+		// line1 : {k : , b : } 分别为斜率和偏移值 是Axis的返回值
+		function intersection (line, point) {
+			// 交点和point线段的斜率
+			var slope = -1 / line.k;
+			/*相交点的坐标*/
+			var x = (line.b - (point.x / line.k + point.y)) / ((line.k - 1) / line.k);
+			var y = line.k * x + line.b;
+			return {
+				x : x,
+				y : y
+			};
+		}
+	</script>
+</body>
+</html>

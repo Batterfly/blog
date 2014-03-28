@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
+</head>
+<body>
+	<div class="main">
+		<canvas id="canvas" width="600" height="400"></canvas>
+	</div>
+	<script>
+		var canvas = document.getElementById('canvas');
+		var ctx = canvas.getContext('2d');
+		
+		ctx.fillStyle = ctx.stokeStyle = '#ccc';
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		var rect1 = {
+			x : 200,
+			y : 200,
+			width : 100,
+			height : 100,
+			angle : 60
+		};
+		var rect2 = {
+			x : 140,
+			y : 150,
+			width : 50,
+			height : 120,
+			angle : 0
+		};
+
+		
+		rotateRectCollide(rect1, rect2);
+
+		function rotateRectCollide (obj1, obj2) {
+			
+			/*获取旋转之后的坐标*/
+			var pointArr1 = rotateRect(obj1);
+			var pointArr2 = rotateRect(obj2);
+			
+			var point1, point2, point3, point4;
+
+			for (var i = 0; i < pointArr1.length; i++) {
+				point1 = pointArr1[i];
+				point2 = pointArr1[i + 1];
+				if (i == pointArr1.length - 1) {
+					point2 = pointArr1[0];
+				}
+				
+				for (var j = 0; j < pointArr2.length; j++)　{
+					point3 = pointArr2[j];
+					point4 = pointArr2[j + 1];
+
+					if (j == pointArr2.length - 1) {
+						point4 = pointArr2[0];
+					}
+					console.log(i, j);
+					if (segmentsIntr(point1, point2, point3, point4)) {
+						console.log('collide');
+						return true;
+					}
+				}
+			}
+			console.log('no collide');
+			return false;
+		}
+
+		/*判断两条直线是否相交*/
+		function segmentsIntr (a, b, c, d) {
+			/*console.log(a.x, a.y);
+			console.log(b.x, b.y);
+			console.log(c.x, c.y);
+			console.log(d.x, d.y);*/
+			// 三角形abc 面积的2倍  
+		    var area_abc = (a.x - c.x) * (b.y - c.y) - (a.y - c.y) * (b.x - c.x);  
+		  
+		    // 三角形abd 面积的2倍  
+		    var area_abd = (a.x - d.x) * (b.y - d.y) - (a.y - d.y) * (b.x - d.x);   
+		  
+		    // 面积符号相同则两点在线段同侧,不相交 (对点在线段上的情况,本例当作不相交处理);  
+		    if ( area_abc * area_abd > 0 ) {  
+		        return false;  
+		    }  
+		  
+		    // 三角形cda 面积的2倍  
+		    var area_cda = (c.x - a.x) * (d.y - a.y) - (c.y - a.y) * (d.x - a.x);  
+		    // 三角形cdb 面积的2倍  
+		    var area_cdb = area_cda + area_abc - area_abd ;  
+		    if (  area_cda * area_cdb > 0 ) {  
+		        return false;  
+		    }  
+		  
+		   return true;
+		   
+		}
+
+		/*返回旋转后的坐标数组*/
+		function rotateRect(obj) {
+			// 画出未旋转的图形
+			ctx.fillStyle = '#000';
+			ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+
+			var points = [
+					{
+						x : -obj.width / 2,
+						y : -obj.height / 2
+					},
+					{
+						x : obj.width / 2,
+						y : -obj.height / 2
+					},
+					{
+						x : obj.width / 2,
+						y : obj.height / 2
+					},
+					{
+						x : -obj.width / 2,
+						y : obj.height / 2
+					}
+				];
+			var centerPoint = {
+				x : obj.x + obj.width / 2,
+				y : obj.y + obj.height / 2
+			};
+			var resPoint = [];
+			for (var i = 0 ; i < points.length; i++) {
+				var point = points[i];
+				var pointTmp = getRotatePointPos(point, obj.angle);
+				resPoint.push({x : pointTmp.x + centerPoint.x, y : pointTmp.y + centerPoint.y});
+			}
+
+			ctx.fillStyle = '#f00';
+			ctx.beginPath();
+			for (var j = 0; j < resPoint.length; j++) {
+				var point = resPoint[j];
+				ctx.lineTo(point.x, point.y);
+			}
+			ctx.closePath();
+			ctx.fill();
+
+			return resPoint;
+		}
+
+		/*获取旋转之后的坐标*/
+		function getRotatePointPos (point, angle) {
+			var matrix = [
+							[0, 0, 0],
+							[0, 0, 0],
+							[0, 0, 1]
+					 	];
+			var cos = Math.cos,
+				sin = Math.sin,
+				angle = angle / 180 * Math.PI;
+
+			matrix[0][0] = cos(angle);
+			matrix[0][1] = sin(angle);
+			matrix[1][0] = -sin(angle);
+			matrix[1][1] = cos(angle);
+
+			var res = {};
+			res.x = point.x * cos(angle) - point.y * sin(angle);
+			res.y = point.x * sin(angle) + point.y * cos(angle);
+
+			return res;
+		}
+		
+	</script>
+</body>
+</html>
