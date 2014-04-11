@@ -13,24 +13,18 @@
         
         ctx.fillStyle = ctx.stokeStyle = '#ccc';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        var rect1 = {
-            x : 200,
-            y : 200,
-            width : 100,
-            height : 100,
-            angle : 0
-        };
+       
         var rect2 = {
-            x : 162,
-            y : 180,
-            width : 50,
-            height : 120,
-            angle : 70
+            x : 300,
+            y : 100,
+            width : 100,
+            height : 50,
+            angle : 60
         };
         var cir = {
-            x : 180,
-            y : 300,
-            rad : 30
+            x : 400,
+            y : 200,
+            rad : 20
         }
         
         circleRectCollide(rect2, cir);
@@ -43,7 +37,7 @@
             ctx.arc(circle.x, circle.y, circle.rad, 0, Math.PI * 2, false);
             ctx.closePath();
             ctx.fill();
-
+            console.dir(rectPoint);
             for (var i = 0; i <  rectPoint.length; i++) {
                 var point = rectPoint[i];
                 var distance = Math.sqrt((circle.x - point.x) * (circle.x - point.x) + (circle.y - point.y) * (circle.y - point.y));
@@ -63,6 +57,7 @@
                 var circleToPoint = {x : circle.x - point.x, y : circle.y - point.y};
                 var angle = Math.atan2(vector.y, vector.x) - Math.atan2(circleToPoint.y, circleToPoint.x);
 
+                console.log(point.x, point.y);
                 var dis = Math.sin(angle) * Math.sqrt(circleToPoint.x * circleToPoint.x + circleToPoint.y * circleToPoint.y);
                 if (dis < circle.rad) {
                     console.log('collide line');

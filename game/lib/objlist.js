@@ -33,16 +33,5 @@ define(function (require, exports, module) {
         return self;
     };
 */
-    return function (width, height) {
-        var canvas = document.createElement('canvas');
-        canvas.id = 'mycanvas';
-        canvas.width = width || 600;
-        canvas.height = height || 400;
-        canvas.ctx = canvas.getContext('2d');
-        document.body.appendChild(canvas);
-        canvas.ctx.fillStyle = '#ccc';
-        canvas.ctx.fillRect(0, 0, canvas.width, canvas.height);
-        return canvas;
-    }();
-
+    return [];
 });

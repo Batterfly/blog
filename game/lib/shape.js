@@ -2,9 +2,9 @@ define(function (require, exports, module){
 
     var util = require('./util');
     var gameObj = require('./gameObj');
-    var Canvas = require('./canvas');
-    canvas = Canvas();
-
+    var canvas = require('./canvas');
+    // var canvas = Canvas();
+   
     var defaultOption = {
         x : 0,
         y : 0,
@@ -14,7 +14,8 @@ define(function (require, exports, module){
         lineWidth : 5,
         style : '#000',
         isFill : true,
-        isStroke : false
+        isStroke : false,
+        angle : 0
     };
 
     // 矩形
@@ -29,7 +30,8 @@ define(function (require, exports, module){
         this.style = options.style;
         this.isFill = options.isFill;
         this.isStroke = options.isStroke;
-        console.dir(this);
+        this.angle = param.angle;
+
         return this;
     };
 
@@ -41,7 +43,14 @@ define(function (require, exports, module){
         
         ctx.fillStyle = ctx.stokeStyle = this.style;
         ctx.beginPath();
-        ctx.rect(this.x, this.y, this.width, this.height);
+        if (this.angle == '0') {
+            ctx.rect(this.x, this.y, this.width, this.height);
+        } else {
+            ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+            ctx.rotate(this.angle / 180 * Math.PI);
+            ctx.rect(-this.width / 2, -this.height / 2, this.width, this.height);
+            ctx.translate(-this.x - this.width / 2, -this.y - this.height / 2);
+        }
         ctx.closePath();
         this.isFill && ctx.fill();
         this.isStroke && ctx.stroke();
@@ -52,6 +61,7 @@ define(function (require, exports, module){
 
      var rectimgObj = function (param) {
         var options = util.extend(defaultOption, param, true);
+        Rect.call(this, options);
         this.img = param.img || new Image();
         this.offsetX = param.offsetX || 0;
         this.offsetY = param.offsetY || 0;
@@ -63,7 +73,16 @@ define(function (require, exports, module){
         var ctx = canvas.ctx;
         ctx.save();
         ctx.beginPath();
-        ctx.drawImage(this.img, this.offsetX, this.offsetY, this.width, this.height, this.x, this.y, this.width, this.height);
+        if (this.angle == '0') {
+            ctx.drawImage(this.img, this.offsetX, this.offsetY, this.width, this.height, this.x, this.y, this.width, this.height);
+        } else {
+            ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+            ctx.rotate(this.angle / 180 * Math.PI);
+            ctx.drawImage(this.img, this.offsetX, this.offsetY, this.width, this.height, -this.width / 2, -this.height / 2, this.width, this.height);
+            ctx.translate(-this.x - this.width / 2, -this.y - this.height / 2);
+        }
+        ctx.closePath();
+        ctx.restore();
         return this;
     };
 
@@ -73,10 +92,18 @@ define(function (require, exports, module){
         var param = param || {};
         var options = util.extend(defaultOption, param, true);
         gameObj.call(this, options.x, options.y, options.width, options.height);
-
-        this.startAngle = param.startAngle || 0;
-        this.endAngle = param.endAngle || Math.PI * 2;
+        this.width = options.width;
+        this.height = options.height;
+        this.rad = options.rad;
+        this.x = options.x;
+        this.y = options.y;
+        this.style = options.style;
+        this.startAngle = options.startAngle || 0;
+        this.endAngle = options.endAngle || Math.PI * 2;
         this.type = 'circle';
+        this.isFill = options.isFill;
+        this.isStroke = options.isStroke;
+
         return this;
     };
 
@@ -98,10 +125,14 @@ define(function (require, exports, module){
     
     var cirimgObj = function (param) {
         var options = util.extend(defaultOption, param, true);
+        Circle.call(this, options);
         this.img = param.img || new Image();
         this.offsetX = param.offsetX || 0;
         this.offsetY = param.offsetY || 0;
+
+        return this;
     };
+
     cirimgObj.prototype = new Circle();
     cirimgObj.prototype.draw = function () {
         var ctx = canvas.ctx;
@@ -110,7 +141,7 @@ define(function (require, exports, module){
         ctx.arc(this.x, this.y, this.rad, this.startAngle, this.endAngle, false);
         ctx.clip();
         ctx.closePath();
-        ctx.drawImage(this.img, this.offsetX, this.offsetY, this.width, this.height, this.x, this.y, this.width, this.height);
+        ctx.drawImage(this.img, this.offsetX, this.offsetY, this.width, this.height, this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
     };
 
     var shape = {

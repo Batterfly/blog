@@ -1,35 +1,126 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <canvas id="canvas"></canvas>
 	<script src='sea.js' data-main="./lib"></script>
 </head>
 <body>
     <script>
         
-        /*seajs.use('./lib/shape', function (shape) {
-            var options = {
-                x : 500,
+        seajs.use('./lib/game', function (Game) {
+                    
+            var imgurl = '0.png';
+            var img = new Image();
+            img.src = imgurl; 
+
+            var imgRect = new Image();
+            imgRect.src = '1.jpg';
+
+            var spriteoptions = {
+                img : img,
+                x : 25,
+                y : 10,
+                width : 80,
+                height : 91,
+                imageWidth : 640,
+                curIndex : 3
+            };
+            var rectoptions = {
+                x : 255,
                 y : 100,
-                width : 200,
+                width : 100,
                 height : 50,
+                angle : 120,
+                img : imgRect,
                 style : '#ff0'
             };
-            var rect = shape.rect;
-            var r = new rect(options);
-            r.draw();
-        })*/
-        seajs.use('./lib/shape', function (shape) {
-            var options = {
-                x : 500,
+
+            var ciroption = {
+                x : 330,
+                y : 180,
+                rad : 20,
+                style : '#f00'
+            };
+            
+            var rectoptions = {
+                x : 255,
                 y : 100,
-                width : 200,
+                width : 100,
                 height : 50,
+                angle : 0,
+                img : imgRect,
                 style : '#ff0'
             };
-            var rect = shape.rect;
-            var r = new rect(options);
-            r.draw();
+            var rectImgoptions = {
+                x : 125,
+                y : 110,
+                width : 200,
+                height : 250,
+                angle : 120,
+                img : imgRect,
+                rad : 100,
+                style : '#ff0'
+            };
+
+            var game = new Game(600, 600);
+            var shape = game.shape;
+            var Rect = shape.rect;
+            var RectImg = shape.rectImg;
+            var CirImg = shape.cirImg;
+            var Circle = shape.circle;
+            var Sprite = game.sprite;
+            var Preload = game.preload.ImageLoad;
+
+            var rect = new Rect(rectoptions);
+            var cir = new Circle(ciroption);
+            rect.draw();
+            cir.draw();
+
+            game.addChild(rect);
+            game.addChild(cir);
+
+            cir.addEventListener('click', function(event) {
+                alert('click a small circle');
+            });
+            rect.addEventListener('click', function(event) {
+                alert('click rect');
+                console.dir(event);
+            });
+
+            /*rect.collide(cir, function () {
+                console.log('rect and cir collide');
+            });*/
+
+            var animationOption = {
+                id : 'run',
+                startIndex : 16,
+                endIndex : 24
+            };
+
+            Preload([{id: 'sprite', url: imgurl}, {id: 'rect', url: '1.jpg'}], function () {
+
+                var rectImg = new RectImg(rectoptions);
+                rectImg.draw();
+                var cirImg = new CirImg(rectImgoptions);
+                cirImg.draw();
+                game.addChild(cirImg);
+                cirImg.addEventListener('click', function(event){
+                    alert('click a circle');
+                });
+
+                var sprite = new Sprite(spriteoptions);
+
+                sprite.addAnimation(animationOption);
+                sprite.play('run');
+                // sprite.changeIndex();
+                setInterval(function(){
+                    // sprite.move(1, 0);
+                    cirImg.draw();
+                    sprite.change();
+                    rect.draw();
+                    cir.draw();
+                }, 100);
+                
+            });
         });
     </script>
 </body>
