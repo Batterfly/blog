@@ -1,0 +1,15 @@
+extends layout
+block content
+form.form-horizontal(method="post")
+	fieldset
+		legend user login
+		div.control-group
+			label.control-label(for="username") username
+			div.controls
+				input.input-xlarge(type='text',id="username",name='username')
+		div.control-grop
+			label.control-label(for='password') password
+			div.controls
+				input.input-xlarge(type='password',id='password',name='password')
+		div.form-action
+			button.btn.btn-primary(type='submit') submit

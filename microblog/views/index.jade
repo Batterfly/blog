@@ -1,0 +1,15 @@
+extends layout
+
+block content
+-  if(!user) {
+  	div.hero-unit
+  		h1 Welcome to Microblog
+  		p Microblog is one blog system based no node.js
+  		p I make it for my love Zhaomeng
+  		p
+  			a.btn.btn-primary.btn-large(href='/login') login
+  			a.btn.btn-large(href='/reg') regsiter
+-  } else {
+  	include say
+-  }
+  	include posts

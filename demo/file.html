@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>this is my demo</title>
+	<style>
+		#drop-zone{
+			width: 400px;
+			height: 300px;
+			background: #ccc;
+		}
+		li img {
+			width: 400px;
+			height: 300px;
+		}
+	</style>
+	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.js" ></script>
+</head>
+<body>
+	<h1>I miss You zhaomeng!</h1>
+	<input type="file" id="files" multiple>
+	<div id="drop-zone">Drop files here</div>
+	<output id="list"></output>
+
+	<ul class="img-list">
+		
+	</ul>
+
+	<script type="text/javascript">
+	function handleFileSelect(evt) {
+		var files = evt.target.files;
+		var html = '';
+		for (var i = 0, file; file = files[i]; i++) {
+			console.dir(file);
+			html += '<li><strong>' + escape(file.name) + '</strong>' + '<strong>' + file.type + '</strong></li>';
+
+		}
+		var list = document.getElementById('list');
+		list.innerHTML = html;
+	}
+
+	document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
+	function dropFiles (e) {
+		e.stopPropagation();
+		e.preventDefault();
+
+		var files = e.dataTransfer.files;
+		for (var i = 0, file; file = files[i]; i++) {
+			if (!file.type.match('image.*')) {
+				continue;
+			}
+			var reader = new FileReader();
+
+			reader.onload = (function (file) {
+				return function (e) {
+					var item = $('<li><img src=""></li>');
+					var img = $('img', item);
+					img.attr('src', e.target.result);
+					$('.img-list').append(item);
+				}
+			})(file);
+			reader.readAsDataURL(file);
+		}
+	}
+	function handleDragOver(e) {
+		e.stopPropagation();
+		e.preventDefault();
+		e.dataTransfer.dropEffect = 'copy';
+	}
+	var dropZone = document.getElementById('drop-zone');
+	dropZone.addEventListener('dragover', handleDragOver, false);
+	dropZone.addEventListener('drop', dropFiles, false);
+	</script>
+</body>
+</html>

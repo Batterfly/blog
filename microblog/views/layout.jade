@@ -1,0 +1,52 @@
+!!! doctype
+html
+script(src='js/jquery.js')
+script(src='js/bootstrap.js')
+head
+	meta(http-equiv='Content-Type, content='text/html; charset=utf-8')
+	title= title
+	link(rel='stylesheet', type='text/css', href='css/bootstrp.css')
+	style
+		body{
+			padding: 10px;
+		}
+body
+	div.navbar.navbar-fixed-top
+		div.navbar-inner
+			div.container
+				a.btn.btn-navbar(data-toggle='collapse', data-targe='.nav-collapse')
+					span.icon-bar
+					span.icon-bar
+					span.icon-bar
+				a.brand(href='/') Microblog
+				div.nav-collpase
+					ul.nav
+						li(class='active')
+							a(herf='/') index
+-						if(!user){
+					ul.nav
+						li
+							a(href='/login') login
+						li
+							a(href='/reg') register
+-						} else {
+					ul.nav
+						li
+							a(href='/logout') logout
+-						}
+	div3container.container
+-		if(success) {
+		div.alert.alert-success
+			= success
+-		}
+		if(error){
+		div.alert.alert-error
+			=error
+-		}
+	block content
+
+	hr
+	footer
+		p
+			a(href='/') for you zhaomeng
+			|2012
