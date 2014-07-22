@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>music player</title>
+	<link rel="stylesheet" type="text/css" href="css/index.css">
+</head>
+<body>
+	<h1>music</h1>
+	<div id="music">
+		<div class="header">
+			<div class="cd-holder">
+				<span class="stick"></span>
+				<div class="cd"></div>
+			</div>
+			<div class="meta-info">
+				<p class="title"><span class="singer">chenke</span><span class="song-name">zhaomeng</span></p>
+				<div class="starbar">
+					<p class="star-number"></p>
+				</div>
+				<div class="volume-control">
+					<a class="decrease"></a>
+					<span class="base-bar">
+						<span class="progress-bar"></span>
+						<a class="slider"></a>
+					</span>
+					<a class="increase"></a>
+				</div>
+			</div>
+			<div class="controls">
+				<div class="play-controls">
+					<a class="btn-pre"></a>
+					<a class="btn-play"></a>
+					<a class="btn-next"></a>
+				</div>
+				<div class="time-line">
+					<span class="passed-time"></span>
+					<span class="base-bar">
+						<span class="progress-bar"></span>
+					</span>
+					<span class="total-time"></span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<audio>
+		
+	</audio>
+	<script src="http://cdn.menkr.com/sea.js" charset="utf-8"></script>
+	<script>
+		seajs.config({
+			base : './js',
+			alias : {
+
+			}
+		});
+		seajs.use('index');
+	</script>
+</body>
+</html>
