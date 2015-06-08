@@ -3,48 +3,161 @@
 <head>
 	<title>music player</title>
 	<link rel="stylesheet" type="text/css" href="css/index.css">
+	<link rel="stylesheet" href="css/fontello.css">
+    <!-- <link rel="stylesheet" href="css/animation.css"> -->
 </head>
 <body>
 	<h1>music</h1>
 	<div id="music">
-		<div class="header">
-			<div class="cd-holder">
-				<span class="stick"></span>
-				<div class="cd"></div>
-			</div>
-			<div class="meta-info">
-				<p class="title"><span class="singer">chenke</span><span class="song-name">zhaomeng</span></p>
-				<div class="starbar">
-					<p class="star-number"></p>
-				</div>
-				<div class="volume-control">
-					<a class="decrease"></a>
-					<span class="base-bar">
-						<span class="progress-bar"></span>
+		<!-- 左部控制栏 -->
+		<div class="left">
+			<div class="header">
+				<h1>酷狗音乐</h1>
+				<!-- 歌曲时间 -->
+				<div class="song-time">
+					<p class="base-bar">
+						<span class="process-bar"></span>
 						<a class="slider"></a>
-					</span>
-					<a class="increase"></a>
+					</p>
+					<p class="time clearfix">
+						<span class="passed-time">01:31</span>
+						<span class="total-time">03:33</span>
+					</p>
+				</div>
+				<!-- 控制台按钮 -->
+				<div class="controls clearfix">
+					<a class="show-lryic">词</a>
+					<a class="model"><i class="icon-shuffle"></i></a>
+					<!-- <p class="controls-btn clearfix"> -->
+						<a class="btn-pre">
+							<i class="icon-to-start"></i>
+						</a>
+						<a class="btn-play">
+							<i class="icon-play"></i>
+							<i class="icon-pause"></i>
+						</a>
+						<a class="btn-next">
+							<i class="icon-to-end"></i>
+						</a>
+					<!-- </p> -->
+					<p class="volume-control">
+						<a class="vol-dec">
+							<i class="icon-volume-down"></i>
+						</a>
+						<span class="base-bar">
+							<span class="progress-bar"></span>
+							<a class="slider"></a>
+						</span>
+						<a class="vol-inc"></a>
+					</p>
 				</div>
 			</div>
-			<div class="controls">
-				<div class="play-controls">
-					<a class="btn-pre"></a>
-					<a class="btn-play"></a>
-					<a class="btn-next"></a>
+
+			<div class="tab cleafix">
+				<div class="tab-menu">
+					<ul class="menu-list">
+						<li class="active">
+							<a href="">
+								<i class="icon-note-beamed"></i>
+							</a>
+						</li>
+						<li>
+							<a href="">
+								<i class="icon-heart"></i>
+							</a>
+						</li>
+						<li>
+							<a href="">
+								<i class="icon-tencent-weibo"></i>
+							</a>
+						</li>
+					</ul>
 				</div>
-				<div class="time-line">
-					<span class="passed-time"></span>
-					<span class="base-bar">
-						<span class="progress-bar"></span>
-					</span>
-					<span class="total-time"></span>
+				<div class="tab-detail">
+					<!-- <ul class="detail-list">
+						<li> -->
+					<div class="detail-item love">
+						<ul class="list">
+							<li class="item">
+								<p class="lite clearfix">
+									<span class="order">01</span>
+									<span class="info">
+										<span class="singer">李克勤、陈慧琳</span>
+										<span class="title">爱一个人</span>
+									</span>
+									<span class="size">2.92M</span>
+								</p>
+							</li>
+							<li class="item">
+								<p class="lite clearfix">
+									<span class="order">02</span>
+									<span class="info">
+										<span class="singer">李克勤、陈慧琳</span>
+										<span class="title">爱一个人</span>
+									</span>
+									<span class="size">2.92M</span>
+								</p>
+							</li>
+							<li class="item">
+								<p class="lite clearfix">
+									<span class="order">03</span>
+									<span class="info">
+										<span class="singer">李克勤、陈慧琳</span>
+										<span class="title">爱一个人</span>
+									</span>
+									<span class="size">2.92M</span>
+								</p>
+							</li>
+							<li class="item">
+								<div class="detail-info clearfix">
+									<img src="3.jpg" alt="头像">
+									<!-- <div> -->
+										<div class="top">
+											<span class="singer">莫文蔚</span> -
+											<span class="title">他不爱我</span>
+											<a class="microphone">
+												<i class="icon-trash"></i>
+											</a>
+											<a class="btn-delete">
+												<i class="icon-mic"></i>
+											</a>
+										</div>
+										<div class="bottom">
+											<span class="passed-time">02:21</span>/
+											<span class="total-time">03:58</span>
+											<p class="btn-list">
+												<a class="open-btn">
+													<i class="icon-folder-open-empty"></i>
+												</a>
+												<a class="temp-btn">
+													<i class="icon-mail"></i>
+												</a>
+												<a class="add-btn">
+													<i class="icon-plus"></i>
+												</a>
+												<a class="share-btn">
+													<i class="icon-location"></i>
+												</a>
+											</p>
+										</div>
+									<!-- </div> -->
+								</div>
+							</li>
+						</ul>
+					</div>
+						<!-- </li>
+					</ul> -->
 				</div>
 			</div>
 		</div>
 	</div>
-	<audio>
+
+	<!--  音乐列表 -->
+	<audio id="myaudio">
 		
 	</audio>
+
+	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
 	<script src="http://cdn.menkr.com/sea.js" charset="utf-8"></script>
 	<script>
 		seajs.config({
